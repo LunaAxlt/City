@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>LUNA CITY · полная версия</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 8px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Шапка со статистикой */
+        .header {
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 16px 20px;
+            border-bottom: 3px solid #9b59b6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .header h1 span {
+            color: #9b59b6;
+        }
+        .stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            background: #252525;
+            padding: 8px 16px;
+            border-radius: 40px;
+            border-left: 3px solid #9b59b6;
+        }
+        .stat-label {
+            color: #888;
+            font-size: 0.7rem;
+        }
+        .stat-value {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* Управление режимами */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tool-btn {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 40px;
+            padding: 10px 18px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tool-btn.active {
+            background: #9b59b6;
+            border-color: #9b59b6;
+        }
+        .tool-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* Игровое поле */
+        .canvas-wrapper {
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 12px;
+            border: 1px solid #333;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            max-height: 60vh;
+        }
+        canvas {
+            display: block;
+            width: 800px;
+            height: 600px;
+            background: #2a2a2a;
+            border-radius: 16px;
+            touch-action: none;
+            margin: 0 auto;
+        }
+
+        /* Палитра зданий */
+        .palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 8px;
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+        .palette-item {
+            background: #252525;
+            border-radius: 16px;
+            padding: 12px 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-left: 3px solid #9b59b6;
+        }
+        .palette-item:active {
+            background: #9b59b6;
+            transform: scale(0.97);
+        }
+        .palette-item.selected {
+            background: #9b59b6;
+        }
+        .palette-emoji {
+            font-size: 2rem;
+        }
+        .palette-name {
+            color: white;
+            font-size: 0.7rem;
+        }
+        .palette-price {
+            color: #9b59b6;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .palette-item.selected .palette-price {
+            color: white;
+        }
+
+        /* Чат */
+        .chat-section {
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid #333;
+        }
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #9b59b6;
+        }
+        .chat-header h2 {
+            color: white;
+            font-size: 1.3rem;
+        }
+        .chat-messages {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .message {
+            background: #252525;
+            border-radius: 16px;
+            padding: 8px 12px;
+            border-left: 3px solid #9b59b6;
+        }
+        .message-author {
+            color: #9b59b6;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .message-text {
+            color: white;
+            font-size: 0.9rem;
+        }
+        .message-time {
+            color: #666;
+            font-size: 0.6rem;
+            text-align: right;
+        }
+        .chat-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .chat-input {
+            flex: 1;
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 30px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .chat-btn {
+            background: #9b59b6;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .login-note {
+            color: #888;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* Кнопки */
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .action-btn {
+            flex: 1;
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 40px;
+            padding: 12px 10px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: center;
+        }
+        .action-btn:active {
+            background: #9b59b6;
+        }
+        .status {
+            text-align: center;
+            color: #9b59b6;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🌆 <span>LUNA CITY</span></h1>
+        <div class="stats">
+            <div class="stat"><div class="stat-label">💰 бюджет</div><div class="stat-value" id="money">5000</div></div>
+            <div class="stat"><div class="stat-label">👥 жители</div><div class="stat-value" id="pop">0</div></div>
+            <div class="stat"><div class="stat-label">😊 счастье</div><div class="stat-value" id="happiness">100%</div></div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="tool-btn active" id="moveBtn">🖐️ двигать</div>
+        <div class="tool-btn" id="upgradeBtn">⬆️ улучшить</div>
+        <div class="tool-btn" id="bulldozeBtn">🚜 снести</div>
+    </div>
+
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="cityCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <div class="palette" id="palette"></div>
+
+    <div class="chat-section">
+        <div class="chat-header">
+            <span>💬</span>
+            <h2>Чат города</h2>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-controls">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Имя: сообщение">
+            <button class="chat-btn" id="sendBtn">→</button>
+        </div>
+        <div class="login-note" id="chatStatus">🔒 Введите пароль для чата: попросите у администрации</div>
+    </div>
+
+    <div class="actions">
+        <div class="action-btn" id="saveBtn">💾 сохранить</div>
+        <div class="action-btn" id="loadBtn">📂 загрузить</div>
+        <div class="action-btn" id="resetBtn">🔄 новая игра</div>
+        <div class="action-btn" id="techBtn">🔧 техперерыв</div>
+    </div>
+    <div class="status" id="status">🔵 игра готова</div>
+</div>
+
+<script>
+// ==================== НАСТРОЙКА SUPABASE ====================
+const supabase = window.supabase.createClient(
+    'https://luna-axlt-forum.supabase.co',
+    'sb_publishable_wCEqbtTXXiTq6ThccQe4fA_K-61hi-G'
+);
+
+// ==================== ПЕРЕМЕННЫЕ ИГРЫ ====================
+const canvas = document.getElementById('cityCanvas');
+const ctx = canvas.getContext('2d');
+const wrapper = document.getElementById('canvasWrapper');
+
+const TILE_SIZE = 32; // размер клетки
+const MAP_WIDTH = 25;
+const MAP_HEIGHT = 19; // чтобы влезало на экран
+
+// Смещение для центровки
+const OFFSET_X = 50;
+const OFFSET_Y = 30;
+
+let game = {
+    money: 5000,
+    population: 0,
+    happiness: 100,
+    buildings: [],
+    fires: [],
+    nextId: 1
+};
+
+let currentMode = 'move';
+let selectedBuilding = null;
+
+// Здания
+const buildings = [
+    { id: 'house',  emoji: '🏠', name: 'дом',     cost: 200, income: 5,  happiness: 5,  workers: 0, police: 0, fire: 0 },
+    { id: 'shop',   emoji: '🏪', name: 'магазин', cost: 300, income: 15, happiness: 8,  workers: 2, police: 0, fire: 0 },
+    { id: 'school', emoji: '🏫', name: 'школа',   cost: 500, income: 0,  happiness: 15, workers: 5, police: 0, fire: 0 },
+    { id: 'office', emoji: '🏢', name: 'офис',    cost: 400, income: 20, happiness: 2,  workers: 3, police: 0, fire: 0 },
+    { id: 'factory',emoji: '🏭', name: 'завод',   cost: 600, income: 30, happiness: -5, workers: 10,police: 0, fire: 2 },
+    { id: 'police', emoji: '🚔', name: 'полиция', cost: 400, income: 0,  happiness: 10, workers: 2, police: 3, fire: 0 },
+    { id: 'hospital',emoji:'🏥', name: 'больница',cost: 450, income: 0,  happiness: 12, workers: 3, police: 0, fire: 1 },
+    { id: 'fire',   emoji: '🚒', name: 'пожарная',cost: 400, income: 0,  happiness: 8,  workers: 2, police: 0, fire: 3 },
+    { id: 'park',   emoji: '🌳', name: 'парк',    cost: 100, income: 0,  happiness: 20, workers: 0, police: 0, fire: 0 }
+];
+
+// ==================== ЧАТ С ПАРОЛЕМ ====================
+const CHAT_PASSWORD = 'luna2026'; // пароль для чата
+let chatRegistered = JSON.parse(localStorage.getItem('chatRegistered')) || false;
+let chatUsername = localStorage.getItem('chatUsername') || '';
+
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const chatStatus = document.getElementById('chatStatus');
+
+async function loadChatMessages() {
+    const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
+    
+    if (error) return;
+    
+    chatMessages.innerHTML = '';
+    data.reverse().forEach(msg => {
+        chatMessages.innerHTML += `
+            <div class="message">
+                <div class="message-author">${msg.author || 'Игрок'}</div>
+                <div class="message-text">${msg.text}</div>
+                <div class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</div>
+            </div>
+        `;
+    });
+}
+
+async function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    
+    // Если не зарегистрирован — проверяем пароль
+    if (!chatRegistered) {
+        if (text === CHAT_PASSWORD) {
+            // Запрос на регистрацию
+            chatRegistered = true;
+            localStorage.setItem('chatRegistered', 'true');
+            chatStatus.innerText = '✅ Регистрация успешна! Теперь введите имя: сообщение';
+            chatInput.value = '';
+            return;
+        } else {
+            alert('❌ Неверный пароль. Обратитесь к администрации');
+            chatInput.value = '';
+            return;
+        }
+    }
+    
+    // Если зарегистрирован, но имя не сохранено — первый раз вводим имя
+    if (!chatUsername) {
+        chatUsername = text;
+        localStorage.setItem('chatUsername', text);
+        chatStatus.innerText = `✅ Добро пожаловать, ${chatUsername}!`;
+        chatInput.value = '';
+        return;
+    }
+    
+    // Нормальная отправка сообщения
+    const { error } = await supabase
+        .from('chat_messages')
+        .insert([{ author: chatUsername, text: text }]);
+    
+    if (!error) {
+        chatInput.value = '';
+        loadChatMessages();
+    }
+}
+
+sendBtn.addEventListener('click', sendMessage);
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+setInterval(loadChatMessages, 3000);
+
+// ==================== ТЕХНИЧЕСКИЙ ПЕРЕРЫВ ====================
+let techMode = localStorage.getItem('techMode') === 'true';
+
+function toggleTechMode() {
+    techMode = !techMode;
+    localStorage.setItem('techMode', techMode);
+    if (techMode) {
+        document.body.innerHTML = `
+            <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0a0a0a; color:#9b59b6; text-align:center; padding:20px;">
+                <div style="background:#1a1a1a; padding:40px; border-radius:40px; border:3px solid #9b59b6;">
+                    <h1 style="font-size:3rem;">🔧</h1>
+                    <h2>Технический перерыв</h2>
+                    <p style="color:#aaa;">Игра временно недоступна. Скоро вернёмся!</p>
+                    <button onclick="location.reload()" style="background:#9b59b6; border:none; padding:15px 30px; border-radius:30px; margin-top:20px;">🔄 проверить</button>
+                </div>
+            </div>
+        `;
+    } else {
+        location.reload();
+    }
+}
+
+document.getElementById('techBtn').addEventListener('click', toggleTechMode);
+
+// ==================== УПРАВЛЕНИЕ ====================
+let touchStart = { x: 0, y: 0 };
+let scrollStart = { left: 0, top: 0 };
+
+wrapper.addEventListener('touchstart', (e) => {
+    touchStart.x = e.touches[0].clientX;
+    touchStart.y = e.touches[0].clientY;
+    scrollStart.left = wrapper.scrollLeft;
+    scrollStart.top = wrapper.scrollTop;
+});
+
+wrapper.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const dx = e.touches[0].clientX - touchStart.x;
+    const dy = e.touches[0].clientY - touchStart.y;
+    wrapper.scrollLeft = scrollStart.left - dx;
+    wrapper.scrollTop = scrollStart.top - dy;
+});
+
+// ==================== КЛИК ПО КАРТЕ ====================
+function handleCanvasClick(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+    const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+    
+    const canvasX = Math.floor((clientX - rect.left) * scaleX);
+    const canvasY = Math.floor((clientY - rect.top) * scaleY);
+    
+    const tileX = Math.floor((canvasX - OFFSET_X) / TILE_SIZE);
+    const tileY = Math.floor((canvasY - OFFSET_Y) / TILE_SIZE);
+    
+    if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT) return;
+    
+    const existing = game.buildings.find(b => b.x === tileX && b.y === tileY);
+    
+    if (currentMode === 'bulldoze') {
+        if (existing) {
+            game.buildings = game.buildings.filter(b => b.id !== existing.id);
+            saveGame();
+        }
+    } else if (currentMode === 'upgrade') {
+        if (existing) {
+            // улучшение
+        }
+    } else if (currentMode === 'build' && selectedBuilding) {
+        if (!existing && game.money >= selectedBuilding.cost) {
+            game.money -= selectedBuilding.cost;
+            game.population += selectedBuilding.workers;
+            game.buildings.push({
+                id: game.nextId++,
+                x: tileX,
+                y: tileY,
+                type: selectedBuilding.id,
+                level: 1
+            });
+            saveGame();
+        }
+    }
+    updateStats();
+    drawMap();
+}
+
+canvas.addEventListener('click', handleCanvasClick);
+canvas.addEventListener('touchstart', handleCanvasClick);
+
+// ==================== СОХРАНЕНИЕ ====================
+function saveGame() {
+    localStorage.setItem('lunaCityFull', JSON.stringify(game));
+    document.getElementById('status').innerText = '✅ сохранено';
+    setTimeout(() => document.getElementById('status').innerText = '🔵 игра готова', 1500);
+}
+
+function loadGame() {
+    const saved = localStorage.getItem('lunaCityFull');
+    if (saved) {
+        game = JSON.parse(saved);
+    }
+    updateStats();
+    drawMap();
+}
+
+function resetGame() {
+    if (confirm('Новая игра?')) {
+        game = {
+            money: 5000,
+            population: 0,
+            happiness: 100,
+            buildings: [],
+            fires: [],
+            nextId: 1
+        };
+        saveGame();
+        drawMap();
+    }
+}
+
+// ==================== ОТРИСОВКА ====================
+function drawMap() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Сетка
+    ctx.strokeStyle = '#3a3a3a';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= MAP_WIDTH; i++) {
+        ctx.beginPath();
+        ctx.moveTo(OFFSET_X + i * TILE_SIZE, OFFSET_Y);
+        ctx.lineTo(OFFSET_X + i * TILE_SIZE, OFFSET_Y + MAP_HEIGHT * TILE_SIZE);
+        ctx.stroke();
+    }
+    for (let i = 0; i <= MAP_HEIGHT; i++) {
+        ctx.beginPath();
+        ctx.moveTo(OFFSET_X, OFFSET_Y + i * TILE_SIZE);
+        ctx.lineTo(OFFSET_X + MAP_WIDTH * TILE_SIZE, OFFSET_Y + i * TILE_SIZE);
+        ctx.stroke();
+    }
+    
+    // Здания
+    game.buildings.forEach(b => {
+        const type = buildings.find(t => t.id === b.type);
+        if (type) {
+            const x = OFFSET_X + b.x * TILE_SIZE;
+            const y = OFFSET_Y + b.y * TILE_SIZE;
+            
+            // Фон здания
+            ctx.fillStyle = '#3a3a3a';
+            ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            
+            // Эмодзи
+            ctx.font = '24px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+            ctx.fillStyle = 'white';
+            ctx.fillText(type.emoji, x + 4, y + 24);
+            
+            // Уровень
+            if (b.level > 1) {
+                ctx.font = 'bold 12px monospace';
+                ctx.fillStyle = '#9b59b6';
+                ctx.fillText('+' + b.level, x + 20, y + 15);
+            }
+        }
+    });
+    
+    // Жители (пешеходы)
+    for (let i = 0; i < game.population / 20; i++) {
+        if (i > 15) break;
+        const x = OFFSET_X + (Math.sin(Date.now()/500 + i) * 100 + 200) % (MAP_WIDTH * TILE_SIZE);
+        const y = OFFSET_Y + (Math.cos(Date.now()/300 + i) * 100 + 200) % (MAP_HEIGHT * TILE_SIZE);
+        ctx.font = '16px "Segoe UI Emoji"';
+        ctx.fillStyle = '#9b59b6';
+        ctx.fillText('🚶', x, y);
+    }
+    
+    // Пожары (если есть)
+    if (game.fires.length > 0) {
+        game.fires.forEach(f => {
+            ctx.font = '24px "Segoe UI Emoji"';
+            ctx.fillStyle = '#ff4444';
+            ctx.fillText('🔥', OFFSET_X + f.x * TILE_SIZE + 8, OFFSET_Y + f.y * TILE_SIZE + 28);
+        });
+    }
+}
+
+// ==================== СИМУЛЯЦИЯ ====================
+function simulate() {
+    let happiness = 100;
+    let hasPolice = false;
+    let hasFire = false;
+    let hasHospital = false;
+    
+    game.buildings.forEach(b => {
+        const type = buildings.find(t => t.id === b.type);
+        if (type) {
+            if (type.id === 'police') hasPolice = true;
+            if (type.id === 'fire') hasFire = true;
+            if (type.id === 'hospital') hasHospital = true;
+            happiness += type.happiness;
+        }
+    });
+    
+    if (!hasPolice) happiness -= 20;
+    if (!hasFire) happiness -= 20;
+    if (!hasHospital) happiness -= 15;
+    
+    if (happiness < 0) happiness = 0;
+    game.happiness = happiness;
+    game.population += Math.floor(game.population * 0.01) + 1;
+    
+    // Случайные пожары
+    if (Math.random() < 0.1 && game.buildings.length > 0) {
+        const randomBuilding = game.buildings[Math.floor(Math.random() * game.buildings.length)];
+        const type = buildings.find(t => t.id === randomBuilding.type);
+        if (type && type.fire > 0) {
+            game.fires.push({ x: randomBuilding.x, y: randomBuilding.y, time: 10 });
+        }
+    }
+    
+    // Тушение пожаров
+    game.fires = game.fires.filter(f => {
+        f.time--;
+        const nearFire = game.buildings.some(b => 
+            Math.abs(b.x - f.x) < 3 && Math.abs(b.y - f.y) < 3 && 
+            buildings.find(t => t.id === b.type)?.id === 'fire'
+        );
+        return f.time > 0 && !nearFire;
+    });
+    
+    updateStats();
+    drawMap();
+}
+
+setInterval(simulate, 5000);
+
+function updateStats() {
+    document.getElementById('money').innerText = game.money;
+    document.getElementById('pop').innerText = game.population;
+    document.getElementById('happiness').innerText = game.happiness + '%';
+}
+
+// ==================== ПАЛИТРА ====================
+function renderPalette() {
+    const palette = document.getElementById('palette');
+    palette.innerHTML = '';
+    buildings.forEach(b => {
+        const div = document.createElement('div');
+        div.className = 'palette-item';
+        if (selectedBuilding === b) div.classList.add('selected');
+        div.innerHTML = `
+            <span class="palette-emoji">${b.emoji}</span>
+            <span class="palette-name">${b.name}</span>
+            <span class="palette-price">${b.cost}💰</span>
+        `;
+        div.addEventListener('click', () => {
+            selectedBuilding = b;
+            currentMode = 'build';
+            document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+        });
+        palette.appendChild(div);
+    });
+}
+
+// ==================== КНОПКИ ====================
+document.getElementById('moveBtn').addEventListener('click', () => {
+    currentMode = 'move';
+    document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('moveBtn').classList.add('active');
+});
+document.getElementById('upgradeBtn').addEventListener('click', () => {
+    currentMode = 'upgrade';
+    document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('upgradeBtn').classList.add('active');
+});
+document.getElementById('bulldozeBtn').addEventListener('click', () => {
+    currentMode = 'bulldoze';
+    document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('bulldozeBtn').classList.add('active');
+});
+document.getElementById('saveBtn').addEventListener('click', saveGame);
+document.getElementById('loadBtn').addEventListener('click', loadGame);
+document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+// ==================== СТАРТ ====================
+renderPalette();
+loadChatMessages();
+loadGame();
+updateStats();
+drawMap();
+</script>
+</body>
+</html>
