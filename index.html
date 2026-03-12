@@ -1,146 +1,486 @@
-<!-- ========== ЧАТ ВНИЗУ ФОРУМА (БЕЗ СОХРАНЕНИЯ) ========== -->
-<style>
-    .forum-chat {
-        margin-top: 40px;
-        background: #1a1a1a;
-        border-radius: 30px;
-        padding: 25px;
-        border: 1px solid #2a2a2a;
-        box-shadow: 0 0 20px rgba(155,89,182,0.2);
-    }
-    .chat-title {
-        color: #9b59b6;
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .chat-messages {
-        background: #1e1e1e;
-        border-radius: 20px;
-        padding: 20px;
-        height: 300px;
-        overflow-y: auto;
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    .message {
-        background: #2a2a2a;
-        padding: 12px 15px;
-        border-radius: 15px;
-        max-width: 80%;
-        word-break: break-word;
-        border-left: 3px solid #9b59b6;
-    }
-    .message .author {
-        color: #9b59b6;
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 5px;
-    }
-    .message .text {
-        color: white;
-    }
-    .chat-input-area {
-        display: flex;
-        gap: 15px;
-        align-items: center;
-    }
-    .chat-input {
-        flex: 1;
-        background: #252525;
-        border: 2px solid #2a2a2a;
-        border-radius: 40px;
-        padding: 15px 20px;
-        color: white;
-        font-size: 1rem;
-        outline: none;
-    }
-    .chat-input:focus {
-        border-color: #9b59b6;
-    }
-    .chat-send {
-        background: #9b59b6;
-        border: none;
-        border-radius: 40px;
-        padding: 15px 30px;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-    .chat-send:active {
-        background: #b07cc6;
-        transform: scale(0.97);
-    }
-</style>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Luna Axlt Studios — игры, которые мы создаем</title>
+    <style>
+        /* ===== СБРОС И ОСНОВНЫЕ НАСТРОЙКИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<div class="forum-chat" id="forumChat">
-    <div class="chat-title">
-        <span>💬</span>
-        <span>Чат форума (сообщения не сохраняются)</span>
-    </div>
-    
-    <div class="chat-messages" id="chatMessages"></div>
-    
-    <div class="chat-input-area">
-        <input type="text" class="chat-input" id="chatInput" placeholder="Имя: сообщение">
-        <button class="chat-send" id="sendBtn">Отправить</button>
-    </div>
-</div>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #0a0c0f;
+            color: #e8edf2;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
 
-<script>
-(function() {
-    const messagesDiv = document.getElementById('chatMessages');
-    const input = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendBtn');
-    
-    // Массив сообщений (только в памяти)
-    let messages = [];
-    
-    // Функция отображения сообщений
-    function renderMessages() {
-        messagesDiv.innerHTML = '';
-        messages.forEach(msg => {
-            // Парсим имя и текст
-            let author = 'Гость';
-            let text = msg;
-            if (msg.includes(':')) {
-                const parts = msg.split(':');
-                author = parts[0].trim();
-                text = parts.slice(1).join(':').trim();
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ===== ТИПОГРАФИЯ ===== */
+        h1, h2, h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 0%, #b0b8c5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 6vw, 3rem);
+            background: linear-gradient(135deg, #c0d0ff, #a0b0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-subhead {
+            font-size: 1.2rem;
+            color: #8f9bb3;
+            max-width: 600px;
+            margin-bottom: 3rem;
+        }
+
+        /* ===== ШАПКА ===== */
+        .header {
+            padding: 2rem 0;
+            border-bottom: 1px solid #1f2937;
+            margin-bottom: 3rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd6a5, #ffb4a2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        /* ===== БЛОКИ ===== */
+        .hero-section {
+            padding: 2rem 0 5rem 0;
+        }
+
+        .hero-description {
+            font-size: 1.3rem;
+            color: #b9c2d4;
+            max-width: 700px;
+            margin: 1.5rem 0 2.5rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .game-card {
+            background: #131720;
+            border-radius: 32px;
+            padding: 2rem 1.8rem;
+            border: 1px solid #253341;
+            transition: transform 0.3s ease, border-color 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px);
+            border-color: #4f6f8f;
+        }
+
+        .game-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
+        }
+
+        .game-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.75rem;
+            color: white;
+        }
+
+        .game-card p {
+            color: #a0aec0;
+            font-size: 1rem;
+        }
+
+        /* ===== БЛОК ТЕСТЕРОВ (как блок с преимуществами у Telega) ===== */
+        .cta-block {
+            background: linear-gradient(145deg, #1a232f, #0f1722);
+            border-radius: 48px;
+            padding: 4rem 3rem;
+            margin: 5rem 0;
+            border: 1px solid #2e3b4e;
+            text-align: center;
+        }
+
+        .cta-block h2 {
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta-block p {
+            font-size: 1.25rem;
+            color: #b9c7dd;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding: 1rem 3rem;
+            border-radius: 60px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 12px 30px -8px #1e3a8a80;
+            border: 1px solid #60a5fa;
+        }
+
+        .cta-button:hover {
+            background: #2563eb;
+            transform: scale(1.02);
+        }
+
+        /* ===== КОНТАКТЫ / КОМАНДА (стилизовано под раздел "Нам доверяют / FAQ" Telega) ===== */
+        .team-contacts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .contact-person {
+            background: #11161f;
+            border-radius: 28px;
+            padding: 2rem 1.5rem;
+            border: 1px solid #273445;
+            text-align: center;
+        }
+
+        .contact-person .avatar {
+            font-size: 3.8rem;
+            margin-bottom: 0.5rem;
+            filter: grayscale(30%);
+        }
+
+        .contact-person .role {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #6f8fbc;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-person .name {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .contact-person .contact-link {
+            display: inline-block;
+            background: #1f2a3a;
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            color: #b3ceff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+            border: 1px solid #3e536b;
+            transition: background 0.2s;
+        }
+
+        .contact-person .contact-link:hover {
+            background: #2d3e57;
+            color: white;
+        }
+
+        /* Бот-помощник — стилизуем как виджет/карточку */
+        .bot-card {
+            background: #0f1824;
+            border-radius: 32px;
+            padding: 2.5rem;
+            margin: 3rem 0 5rem;
+            border: 1px solid #2d405b;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .bot-info h3 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bot-info p {
+            color: #b1c3df;
+            font-size: 1.1rem;
+        }
+
+        .bot-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .bot-button {
+            background: #253141;
+            border-radius: 40px;
+            padding: 0.8rem 2rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid #4b6589;
+            transition: background 0.2s;
+        }
+
+        .bot-button:hover {
+            background: #2f4057;
+        }
+
+        .bot-button.primary {
+            background: #3b82f6;
+            border-color: #90bdf4;
+        }
+
+        .bot-button.primary:hover {
+            background: #2563eb;
+        }
+
+        /* ===== ФУТЕР (как у Telega — мелко, но информативно) ===== */
+        .footer {
+            border-top: 1px solid #1f2937;
+            padding: 2.5rem 0;
+            margin-top: 5rem;
+            color: #7f8ea3;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .footer small {
+            font-size: 0.95rem;
+        }
+
+        .footer-links a {
+            color: #9aaec9;
+            text-decoration: none;
+            margin-left: 2rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .header-content {
+                flex-direction: column;
+                align-items: start;
             }
-            
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
-            msgDiv.innerHTML = `
-                <div class="author">${author}</div>
-                <div class="text">${text}</div>
-            `;
-            messagesDiv.appendChild(msgDiv);
-        });
-        // Прокрутка вниз
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-    
-    // Отправка сообщения
-    function sendMessage() {
-        const text = input.value.trim();
-        if (!text) return;
-        
-        messages.push(text);
-        input.value = '';
-        renderMessages();
-    }
-    
-    // Обработчики
-    sendBtn.addEventListener('click', sendMessage);
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
-})();
-</script>
-<!-- ========== КОНЕЦ ЧАТА ========== -->
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 1rem 1.5rem;
+            }
+            .cta-block {
+                padding: 3rem 1.5rem;
+            }
+            .bot-card {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .footer {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-links a {
+                margin: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ШАПКА (как у Telega — минималистичная) -->
+        <header class="header">
+            <div class="header-content">
+                <span class="logo">✦ Luna Axlt Studios</span>
+                <div class="nav-links">
+                    <a href="#">Игры</a>
+                    <a href="#">Тестеры</a>
+                    <a href="#">Контакты</a>
+                    <a href="#">Бот</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- HERO БЛОК (первый экран, как на telega.me) -->
+        <section class="hero-section">
+            <h1>Студия разработки<br>игр Luna Axlt</h1>
+            <div class="hero-description">
+                Создаём миры, в которые хочется возвращаться. Открытый RPG, квест-мессенджер и атмосферный хоррор.
+            </div>
+            <!-- Небольшой "якорь" как в telega "Ваш Telegram всегда с вами" — но в нашем контексте -->
+            <p style="color: #778da0; border-left: 3px solid #3b82f6; padding-left: 1.2rem; margin-top: 1rem;">
+                ⚡ Активная разработка, закрытые тесты и живое сообщество.
+            </p>
+        </section>
+
+        <!-- БЛОК ИГР (аналог "Все возможности в одном приложении" у Telega, но с играми) -->
+        <h2>Наши проекты</h2>
+        <div class="section-subhead">То, что мы создаём с душой и технологиями</div>
+
+        <div class="games-grid">
+            <!-- Карточка 1: Ryam World -->
+            <div class="game-card">
+                <div class="game-icon">⚔️</div>
+                <h3>Ryam World</h3>
+                <p>Основной проект вселенной. Открытый мир, приключения, магия. Уникальная игровая механика и глубокий сюжет.</p>
+            </div>
+            <!-- Карточка 2: Quest Messenger -->
+            <div class="game-card">
+                <div class="game-icon">💬</div>
+                <h3>Quest Messenger</h3>
+                <p>Квест-мессенджер совместно с GamesDeloPointAI. Общайся и проходи сюжет прямо в чате.</p>
+            </div>
+            <!-- Карточка 3: 3D Хоррор -->
+            <div class="game-card">
+                <div class="game-icon">👻</div>
+                <h3>3D Хоррор</h3>
+                <p>Атмосферный хоррор с уникальным сюжетом. Психологический триллер от первого лица.</p>
+            </div>
+        </div>
+
+        <!-- БЛОК "ИЩЕМ ТЕСТЕРОВ!" — как крупный призыв к действию (стиль Telega: "Нам доверяют", но функционально) -->
+        <div class="cta-block">
+            <h2>🎯 Ищем тестеров!</h2>
+            <p>Активно ведётся разработка игр и уже проходят закрытые тестирования. Хочешь попасть в команду тестеров и влиять на игры?</p>
+            <a href="#" class="cta-button">Написать боту: @LunaAxltsupportbot</a>
+        </div>
+
+        <!-- КОНТАКТЫ РУКОВОДСТВА (стилизовано под раздел "Отзывы / FAQ" у Telega — но у нас контакты) -->
+        <h2>Связь с руководством</h2>
+        <div class="section-subhead">Всегда на связи, отвечаем быстро</div>
+
+        <div class="team-contacts">
+            <div class="contact-person">
+                <div class="avatar">🎮</div>
+                <div class="role">Основатель, гейм-дизайн</div>
+                <div class="name">Luna Axlt</div>
+                <a href="#" class="contact-link">@LunaAxlt</a>
+            </div>
+            <div class="contact-person">
+                <div class="avatar">🤝</div>
+                <div class="role">Менеджер проектов</div>
+                <div class="name">Менеджер</div>
+                <a href="#" class="contact-link">@LunaAxltofficial</a>
+            </div>
+            <div class="contact-person">
+                <div class="avatar">🛠️</div>
+                <div class="role">Техподдержка</div>
+                <div class="name">Support</div>
+                <a href="#" class="contact-link">@LunaAxltsupportbot</a>
+            </div>
+        </div>
+
+        <!-- БЛОК ПОМОЩНИКА (аналог "Часто задаваемые вопросы" Telega, но в виде бота) -->
+        <div class="bot-card">
+            <div class="bot-info">
+                <h3>💬 Помощник Luna Axlt ✕</h3>
+                <p>Привет! Я помощник студии Luna Axlt. Выбери вопрос, и я помогу:</p>
+                <p style="margin-top: 0.8rem; color: #a7c0e0;">— Узнать о играх<br>— Стать тестером<br>— Связаться с командой</p>
+            </div>
+            <div class="bot-actions">
+                <a href="#" class="bot-button">Начать диалог</a>
+                <a href="#" class="bot-button primary">@LunaAxltsupportbot</a>
+            </div>
+        </div>
+
+        <!-- ДОПОЛНИТЕЛЬНЫЙ БЛОК "НОВОСТИ / СОБЫТИЯ" — как у Telega, но коротко -->
+        <div style="margin: 4rem 0;">
+            <h2>🔥 События студии</h2>
+            <div class="section-subhead">Последние новости и анонсы</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1.5rem;">
+                <div style="background:#111a24; border-radius: 24px; padding: 1.5rem;">
+                    <span style="color:#6285c3;">⚡ 15.03.2026</span>
+                    <p style="font-weight:600; margin: 0.5rem 0;">Закрытый альфа-тест Ryam World</p>
+                    <small style="color:#859ab3;">Первые отзывы игроков уже получены</small>
+                </div>
+                <div style="background:#111a24; border-radius: 24px; padding: 1.5rem;">
+                    <span style="color:#6285c3;">📢 01.04.2026</span>
+                    <p style="font-weight:600; margin: 0.5rem 0;">Quest Messenger: новый движок</p>
+                    <small style="color:#859ab3;">Интеграция с AI диалогами</small>
+                </div>
+                <div style="background:#111a24; border-radius: 24px; padding: 1.5rem;">
+                    <span style="color:#6285c3;">👻 20.04.2026</span>
+                    <p style="font-weight:600; margin: 0.5rem 0;">Тизер 3D Хоррора</p>
+                    <small style="color:#859ab3;">Атмосферный ролик уже этим летом</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- ФУТЕР (как у Telega: ссылки, копирайт) -->
+        <footer class="footer">
+            <small>© 2026 Luna Axlt Studios Games. Все права защищены.</small>
+            <div class="footer-links">
+                <a href="#">Telegram</a>
+                <a href="#">Поддержка</a>
+                <a href="#">Вакансии</a>
+                <a href="#">Политика</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
