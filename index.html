@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Атомный щит · расширенная панель</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a141f 0%, #1c2c38 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            padding: 16px;
+        }
+
+        /* Главный щит — ещё массивнее */
+        .reactor-panel {
+            background: #264653;
+            background-image: radial-gradient(circle at 15% 30%, #3d6275 2px, transparent 2px),
+                              radial-gradient(circle at 80% 70%, #3d6275 2px, transparent 2px);
+            background-size: 45px 45px;
+            border: 10px solid #6d8f9c;
+            border-radius: 70px 70px 50px 50px;
+            box-shadow: 0 25px 35px rgba(0, 0, 0, 0.8), inset 0 -6px 10px #1a2d38, inset 0 6px 12px #a2cfec;
+            padding: 35px 40px 40px 40px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Верхняя панель индикации — теперь 8 ламп */
+        .indicator-strip {
+            background: #1c2d37;
+            border-radius: 60px 60px 30px 30px;
+            padding: 18px 25px 12px 25px;
+            margin-bottom: 30px;
+            border: 3px solid #4d7386;
+            box-shadow: inset 0 3px 10px #0a151b;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px 25px;
+        }
+
+        .led-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+        }
+
+        .led-label {
+            color: #c0e6ff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: #10222b;
+            padding: 5px 14px;
+            border-radius: 30px;
+            margin-bottom: 8px;
+            border: 2px solid #3a6c84;
+            white-space: nowrap;
+            box-shadow: inset 0 1px 3px #6a9fbb;
+        }
+
+        .led {
+            width: 40px;
+            height: 40px;
+            background: #2b1f14;
+            border-radius: 50%;
+            border: 4px solid #7a99aa;
+            box-shadow: 0 0 8px #ffd966, inset 0 0 6px black;
+            transition: background 0.07s, box-shadow 0.1s;
+        }
+
+        .led.active-green { background: #1effbc; box-shadow: 0 0 26px #3eff9e, inset 0 0 8px white; border-color: #d4ffd4; }
+        .led.active-yellow { background: #ffe066; box-shadow: 0 0 26px #ffbb33, inset 0 0 8px white; border-color: #fff3b0; }
+        .led.active-red { background: #ff5e5e; box-shadow: 0 0 30px #ff3232, inset 0 0 10px white; border-color: #ffc1c1; }
+        .led.active-blue { background: #3bc0ff; box-shadow: 0 0 30px #0088ff, inset 0 0 10px white; border-color: #b5e4ff; }
+        .led.flicker { animation: flicker 0.2s infinite alternate; }
+
+        @keyframes flicker {
+            0% { opacity: 1; box-shadow: 0 0 30px currentColor; }
+            100% { opacity: 0.4; box-shadow: 0 0 8px currentColor; }
+        }
+
+        /* основная секция — теперь 4 колонки */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px 20px;
+            margin-bottom: 35px;
+        }
+
+        /* карточка управления */
+        .control-card {
+            background: #2a404f;
+            border-radius: 35px 35px 28px 28px;
+            padding: 22px 12px 18px 12px;
+            border: 4px solid #5c8398;
+            box-shadow: inset 0 -4px 0 #1b2d38, inset 0 3px 12px #addbff, 0 7px 0 #0f222b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-title {
+            color: #f0fbff;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-shadow: 0 2px 0 #12232e;
+            background: #213946;
+            padding: 6px 18px;
+            border-radius: 40px;
+            margin-top: -38px;
+            margin-bottom: 18px;
+            border: 3px solid #679bb3;
+            box-shadow: inset 0 1px 4px #d2f0ff;
+        }
+
+        .value-display {
+            background: #11232b;
+            color: #7ff5ff;
+            font-family: 'Courier New', monospace;
+            font-size: 2.2rem;
+            font-weight: 700;
+            padding: 8px 0px 4px 0px;
+            text-align: center;
+            border-radius: 25px;
+            width: 100%;
+            margin: 6px 0 16px 0;
+            border: 3px solid #2b7f9c;
+            box-shadow: inset 0 0 22px #001c26;
+            letter-spacing: 3px;
+        }
+
+        /* рычаги (более массивные) */
+        .lever-switch {
+            position: relative;
+            width: 90px;
+            height: 125px;
+            margin: 8px auto 12px;
+        }
+
+        .lever-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .lever-body {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #6b5c4b;
+            border-radius: 50px 50px 25px 25px;
+            border: 4px solid #efcba1;
+            box-shadow: inset 0 -18px 0 #4d3f33, 0 8px 0 #3a2f25;
+            cursor: pointer;
+            transition: 0.08s;
+        }
+
+        .lever-handle {
+            position: absolute;
+            width: 32px;
+            height: 70px;
+            background: linear-gradient(145deg, #f5dfc0, #ccb191);
+            border: 4px solid #6f5d49;
+            border-radius: 40px;
+            bottom: 25px;
+            left: 25px;
+            box-shadow: 0 6px 0 #8b7761;
+            transform-origin: bottom center;
+            transition: transform 0.15s ease-out;
+            transform: rotate(0deg);
+        }
+
+        .lever-switch input:checked + .lever-body .lever-handle {
+            transform: rotate(38deg);
+            box-shadow: 0 3px 0 #8b7761;
+        }
+
+        /* тумблеры (маленькие рычажки) */
+        .toggle-bank {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            margin: 12px 0;
+        }
+        .mini-toggle {
+            position: relative;
+            width: 38px;
+            height: 58px;
+        }
+        .mini-toggle input {
+            opacity: 0;
+            position: absolute;
+        }
+        .toggle-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #414a51;
+            border-radius: 20px 20px 8px 8px;
+            border: 3px solid #8499a6;
+            box-shadow: inset 0 -8px 0 #262e34, 0 3px 0 #2b3339;
+            cursor: pointer;
+        }
+        .toggle-handle {
+            position: absolute;
+            width: 22px;
+            height: 28px;
+            background: #b3c7d6;
+            border: 3px solid #3c5b6b;
+            border-radius: 12px;
+            bottom: 10px;
+            left: 5px;
+            transform-origin: bottom center;
+            transition: transform 0.1s;
+            transform: rotate(0deg);
+        }
+        .mini-toggle input:checked + .toggle-body .toggle-handle {
+            transform: rotate(30deg);
+            background: #ffe28a;
+        }
+
+        /* кнопки (круглые, разных цветов) */
+        .big-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 6px solid #b0d2e6;
+            box-shadow: 0 10px 0 #253946, inset 0 -8px 8px #1c3b4a, inset 0 8px 12px #ebffff;
+            cursor: pointer;
+            transition: 0.06s linear;
+            margin: 8px auto 12px;
+        }
+        .big-button:active {
+            transform: translateY(7px);
+            box-shadow: 0 3px 0 #253946, inset 0 -4px 6px #1c3b4a, inset 0 8px 12px #ebffff;
+        }
+        .button-red { background: #ad3a3a; border-color: #ffaeae; }
+        .button-yellow { background: #cf9f2e; border-color: #ffe49e; }
+        .button-blue { background: #2f7799; border-color: #b2e4ff; }
+        .button-green { background: #2b7a4b; border-color: #b3ffcf; }
+
+        .button-label {
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            background: #1d3d4d;
+            padding: 4px 12px;
+            border-radius: 30px;
+            border: 2px solid #83adc2;
+        }
+
+        /* нижняя панель — ещё больше индикации */
+        .power-indicator {
+            display: flex;
+            justify-content: space-between;
+            background: #0e2833;
+            border-radius: 60px;
+            padding: 22px 35px;
+            border: 4px solid #2f718b;
+            box-shadow: inset 0 2px 18px black;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .core-status {
+            display: flex;
+            gap: 35px;
+            color: #ade4ff;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+        .core-status span {
+            background: #10333f;
+            padding: 12px 22px;
+            border-radius: 60px;
+            border: 3px solid #279fc7;
+            font-family: 'Courier New', monospace;
+        }
+
+        .emergency-btn {
+            background: #b63434;
+            border-radius: 60px;
+            padding: 14px 28px;
+            font-weight: 900;
+            font-size: 1.6rem;
+            color: white;
+            border-bottom: 7px solid #631919;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: 0.05s;
+            box-shadow: 0 0 22px #ff7b7b;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        .emergency-btn:active { transform: translateY(6px); border-bottom-width: 2px; }
+
+        .info-message {
+            color: #b9e2ff;
+            font-size: 1.2rem;
+            background: #1b3e4ed9;
+            border-radius: 40px;
+            padding: 12px 28px;
+            border: 3px solid #50c0ff;
+            font-weight: 600;
+        }
+
+        .extra-leds {
+            display: flex;
+            gap: 18px;
+            margin-top: 8px;
+        }
+        .mini-led {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #221d16;
+            border: 2px solid gray;
+            transition: 0.07s;
+        }
+
+        footer { color: #386277; margin-top: 24px; text-align: center; font-size: 0.9rem; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="reactor-panel">
+        <!-- Верхняя полоса: теперь 8 светодиодов -->
+        <div class="indicator-strip">
+            <div class="led-group"><span class="led-label">РОД-1</span><div id="ledRod1" class="led active-green"></div></div>
+            <div class="led-group"><span class="led-label">РОД-2</span><div id="ledRod2" class="led active-green"></div></div>
+            <div class="led-group"><span class="led-label">НАСОС</span><div id="ledPump" class="led active-green"></div></div>
+            <div class="led-group"><span class="led-label">ДАВЛ.</span><div id="ledPress" class="led"></div></div>
+            <div class="led-group"><span class="led-label">ТЕМП.</span><div id="ledTemp" class="led"></div></div>
+            <div class="led-group"><span class="led-label">ТУРБ.</span><div id="ledTurb" class="led"></div></div>
+            <div class="led-group"><span class="led-label">АВАРИЯ</span><div id="ledAlarm" class="led"></div></div>
+            <div class="led-group"><span class="led-label">КОНТР.</span><div id="ledControl" class="led active-blue"></div></div>
+        </div>
+
+        <!-- ОСНОВНАЯ СЕТКА: теперь 4x3 = 12 элементов управления -->
+        <div class="controls-grid">
+            <!-- 1. Рычаг стержней -->
+            <div class="control-card"><div class="card-title">СТЕРЖНИ АЗ</div><div id="rodValue" class="value-display">68%</div>
+                <label class="lever-switch"><input type="checkbox" id="rodLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
+                <span style="color:#b5defa;">группа 1</span></div>
+
+            <!-- 2. Рычаг насосов -->
+            <div class="control-card"><div class="card-title">ГЦН</div><div id="pumpValue" class="value-display">92%</div>
+                <label class="lever-switch"><input type="checkbox" id="pumpLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
+                <span style="color:#b5defa;">4 насоса</span></div>
+
+            <!-- 3. Кнопка красная (аварийная вентиляция) -->
+            <div class="control-card"><div class="card-title">ВЕНТИЛ.</div><div id="ventValue" class="value-display">ВЫКЛ</div>
+                <div class="big-button button-red" id="ventButton" tabindex="0"></div><span class="button-label" id="ventLabel">АВАРИЯ</span></div>
+
+            <!-- 4. Тумблеры (целых три!) -->
+            <div class="control-card"><div class="card-title">СЕКТОРЫ</div><div class="toggle-bank">
+                <label class="mini-toggle"><input type="checkbox" id="toggle1" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+                <label class="mini-toggle"><input type="checkbox" id="toggle2"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+                <label class="mini-toggle"><input type="checkbox" id="toggle3" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+            </div><span style="color:#b5defa;">резерв 1-3</span></div>
+
+            <!-- 5. Кнопка желтая (турбина) -->
+            <div class="control-card"><div class="card-title">ТУРБИНА</div><div id="turbineValue" class="value-display">80%</div>
+                <div class="big-button button-yellow" id="turbineButton" tabindex="0"></div><span class="button-label" id="turbineLabel">СБРОС</span></div>
+
+            <!-- 6. Рычаг АЗ-5 (дубль) -->
+            <div class="control-card"><div class="card-title">АЗ-5</div><div id="azValue" class="value-display">ВЗВЕД</div>
+                <label class="lever-switch"><input type="checkbox" id="azLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
+                <span style="color:#b5defa;">быстрый стоп</span></div>
+
+            <!-- 7. Кнопка синяя (перегрузка) -->
+            <div class="control-card"><div class="card-title">ПЕРЕГР.</div><div id="reloadValue" class="value-display">СТОП</div>
+                <div class="big-button button-blue" id="reloadButton" tabindex="0"></div><span class="button-label" id="reloadLabel">ЗАПУСК</span></div>
+
+            <!-- 8. Еще три тумблера (4-6) -->
+            <div class="control-card"><div class="card-title">ФИДЕРЫ</div><div class="toggle-bank">
+                <label class="mini-toggle"><input type="checkbox" id="toggle4"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+                <label class="mini-toggle"><input type="checkbox" id="toggle5" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+                <label class="mini-toggle"><input type="checkbox" id="toggle6"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+            </div><span style="color:#b5defa;">секции</span></div>
+
+            <!-- 9. Доп. рычаг (конденсат) -->
+            <div class="control-card"><div class="card-title">КОНДЕНС.</div><div id="condValue" class="value-display">73%</div>
+                <label class="lever-switch"><input type="checkbox" id="condLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
+                <span style="color:#b5defa;">отвод тепла</span></div>
+
+            <!-- 10. Кнопка зеленая (продувка) -->
+            <div class="control-card"><div class="card-title">ПРОДУВ</div><div id="purgeValue" class="value-display">0%</div>
+                <div class="big-button button-green" id="purgeButton" tabindex="0"></div><span class="button-label" id="purgeLabel">Гелий</span></div>
+
+            <!-- 11. Два больших вертикальных тумблера (имитация) -->
+            <div class="control-card"><div class="card-title">БАЙПАС</div><div class="toggle-bank">
+                <label class="mini-toggle"><input type="checkbox" id="bypass1"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+                <label class="mini-toggle"><input type="checkbox" id="bypass2" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
+            </div><span style="color:#b5defa;">1/2</span></div>
+
+            <!-- 12. Индикаторная панель с мелкими лампочками -->
+            <div class="control-card"><div class="card-title">ЛАМПЫ</div><div class="extra-leds">
+                <div id="mini1" class="mini-led active-green"></div><div id="mini2" class="mini-led"></div><div id="mini3" class="mini-led active-red"></div>
+                <div id="mini4" class="mini-led active-yellow"></div>
+            </div><span style="color:#b5defa;">диагност</span></div>
+        </div>
+
+        <!-- Нижняя панель — куча циферок и кнопка -->
+        <div class="power-indicator">
+            <div class="core-status">
+                <span id="corePower">⚡ 97%</span>
+                <span id="coreTemp">🌡 347°C</span>
+                <span id="corePress">⏢ 7.2 Bar</span>
+            </div>
+            <button class="emergency-btn" id="az5button">АЗ-5</button>
+            <div id="messageBox" class="info-message">СТАБИЛЬНО</div>
+        </div>
+        <footer>🔴 ЩИТ УПРАВЛЕНИЯ ЭНЕРГОБЛОКА №4 | 16 РЕЖИМОВ 🔴</footer>
+    </div>
+
+    <script>
+        (function() {
+            // --- Состояния (множество элементов) ---
+            let rodIn = true, pumpOn = true, ventActive = false, azArmed = true, turbinePress = false;
+            let condLeverState = true; // конденсат
+            let purgeState = false;     // продувка
+            // тумблеры (6 штук)
+            let toggles = [true, false, true, false, true, false]; // индексы 0-5
+            let bypass = [false, true];
+
+            // ссылки на новые элементы
+            const rodLever = document.getElementById('rodLever');
+            const pumpLever = document.getElementById('pumpLever');
+            const azLever = document.getElementById('azLever');
+            const condLever = document.getElementById('condLever');
+            const ventButton = document.getElementById('ventButton');
+            const turbineButton = document.getElementById('turbineButton');
+            const reloadButton = document.getElementById('reloadButton');
+            const purgeButton = document.getElementById('purgeButton');
+            const az5big = document.getElementById('az5button');
+
+            // тумблеры
+            const toggle1 = document.getElementById('toggle1');
+            const toggle2 = document.getElementById('toggle2');
+            const toggle3 = document.getElementById('toggle3');
+            const toggle4 = document.getElementById('toggle4');
+            const toggle5 = document.getElementById('toggle5');
+            const toggle6 = document.getElementById('toggle6');
+            const bypass1 = document.getElementById('bypass1');
+            const bypass2 = document.getElementById('bypass2');
+
+            // дисплеи
+            const rodValue = document.getElementById('rodValue');
+            const pumpValue = document.getElementById('pumpValue');
+            const ventValue = document.getElementById('ventValue');
+            const turbineValue = document.getElementById('turbineValue');
+            const azValue = document.getElementById('azValue');
+            const reloadValue = document.getElementById('reloadValue');
+            const condValue = document.getElementById('condValue');
+            const purgeValue = document.getElementById('purgeValue');
+            const corePower = document.getElementById('corePower');
+            const coreTemp = document.getElementById('coreTemp');
+            const corePress = document.getElementById('corePress');
+            const messageBox = document.getElementById('messageBox');
+
+            // лампочки (8 верхних + 4 mini)
+            const ledRod1 = document.getElementById('ledRod1');
+            const ledRod2 = document.getElementById('ledRod2');
+            const ledPump = document.getElementById('ledPump');
+            const ledPress = document.getElementById('ledPress');
+            const ledTemp = document.getElementById('ledTemp');
+            const ledTurb = document.getElementById('ledTurb');
+            const ledAlarm = document.getElementById('ledAlarm');
+            const ledControl = document.getElementById('ledControl');
+            const mini1 = document.getElementById('mini1');
+            const mini2 = document.getElementById('mini2');
+            const mini3 = document.getElementById('mini3');
+            const mini4 = document.getElementById('mini4');
+
+            // --- Функция обновления всего и вся ---
+            function refreshDisplay() {
+                // считываем рычаги
+                rodIn = rodLever.checked;
+                pumpOn = pumpLever.checked;
+                azArmed = azLever.checked;
+                condLeverState = condLever.checked;
+
+                // тумблеры
+                toggles[0] = toggle1.checked;
+                toggles[1] = toggle2.checked;
+                toggles[2] = toggle3.checked;
+                toggles[3] = toggle4.checked;
+                toggles[4] = toggle5.checked;
+                toggles[5] = toggle6.checked;
+                bypass[0] = bypass1.checked;
+                bypass[1] = bypass2.checked;
+
+                // обновление текстовых значений
+                rodValue.innerText = rodIn ? '68%' : '32%';
+                pumpValue.innerText = pumpOn ? '92%' : '41%';
+                azValue.innerText = azArmed ? 'ВЗВЕД' : 'СНЯТ';
+                condValue.innerText = condLeverState ? '73%' : '28%';
+                ventValue.innerText = ventActive ? 'ВКЛ' : 'ВЫКЛ';
+                document.getElementById('ventLabel').innerText = ventActive ? 'ОТКЛ' : 'АВАРИЯ';
+                turbineValue.innerText = turbinePress ? '68%' : '80%';
+                reloadValue.innerText = purgeState ? 'АКТИВ' : 'СТОП';  // используем purge для примера
+                document.getElementById('reloadLabel').innerText = purgeState ? 'ОТКЛ' : 'ЗАПУСК';
+                purgeValue.innerText = purgeState ? '65%' : '0%';
+                document.getElementById('purgeLabel').innerText = purgeState ? 'СТОП' : 'Гелий';
+
+                // --- РАСЧЁТ ПАРАМЕТРОВ РЕАКТОРА (запутанный, много зависимостей) ---
+                let basePower = 97;
+                if (!rodIn) basePower += 20; else basePower -= 5;
+                if (!pumpOn) basePower -= 28; else basePower += 4;
+                if (ventActive) basePower += 3; else basePower -= 2;
+                if (!azArmed) basePower += 35;
+                if (turbinePress) basePower -= 15;
+                if (!condLeverState) basePower -= 12;
+                if (purgeState) basePower += 5; else basePower -= 1;
+                // влияние тумблеров (чем больше включено, тем выше мощность)
+                let toggleCount = toggles.filter(v => v).length;
+                basePower += (toggleCount - 3) * 3;  // -3 .. +6
+                if (bypass[0] && bypass[1]) basePower += 5;
+                else if (!bypass[0] && !bypass[1]) basePower -= 4;
+
+                // ограничение
+                basePower = Math.min(148, Math.max(12, basePower));
+                let displayPower = Math.round(basePower);
+                let temp = 347 + (displayPower - 97) * 2.6;
+                temp = Math.min(610, Math.max(190, Math.round(temp)));
+                let press = (7.2 + (temp - 347) * 0.02).toFixed(1);
+                if (press < 3) press = 3;
+                if (press > 12) press = 12;
+
+                corePower.innerText = `⚡ ${displayPower}%`;
+                coreTemp.innerText = `🌡 ${temp}°C`;
+                corePress.innerText = `⏢ ${press} Bar`;
+
+                // --- ВЕРХНИЕ LED (8 штук) ---
+                ledRod1.className = 'led ' + (rodIn ? 'active-green' : 'active-yellow');
+                ledRod2.className = 'led ' + (rodIn ? (toggleCount>3?'active-green':'active-green') : 'active-yellow'); // просто второй
+                ledPump.className = 'led ' + (pumpOn ? 'active-green' : 'active-red');
+                // давление
+                if (press > 10.2) ledPress.className = 'led active-red';
+                else if (press > 8.5) ledPress.className = 'led active-yellow';
+                else ledPress.className = 'led active-green';
+                // температура
+                if (temp > 520) ledTemp.className = 'led active-red flicker';
+                else if (temp > 430) ledTemp.className = 'led active-yellow';
+                else ledTemp.className = 'led active-green';
+                // турбина
+                ledTurb.className = 'led ' + (turbinePress ? 'active-yellow' : (displayPower > 110 ? 'active-red' : 'active-green'));
+                // авария общая
+                if (displayPower > 125 || temp > 560) ledAlarm.className = 'led active-red flicker';
+                else if (displayPower > 105 || temp > 470) ledAlarm.className = 'led active-yellow';
+                else ledAlarm.className = 'led';
+                // контрольная (мигает если много тумблеров)
+                ledControl.className = 'led ' + (toggleCount > 4 ? 'active-blue flicker' : 'active-blue');
+
+                // мини лампочки в карточке
+                mini1.className = 'mini-led ' + (rodIn ? 'active-green' : '');
+                mini2.className = 'mini-led ' + (pumpOn ? 'active-green' : '');
+                mini3.className = 'mini-led ' + (ventActive ? 'active-red' : 'active-red'); // всегда красная для красоты
+                mini4.className = 'mini-led ' + (azArmed ? 'active-yellow' : 'active-yellow');
+
+                // сообщение
+                if (displayPower > 128 || temp > 570) messageBox.innerText = '⚠️ РАЗРУШЕНИЕ ⚠️';
+                else if (displayPower > 108 || temp > 490) messageBox.innerText = '❗ АВАРИЯ ❗';
+                else if (!azArmed) messageBox.innerText = 'АЗ СНЯТА!';
+                else if (toggleCount > 5) messageBox.innerText = 'ПЕРЕГРУЗКА';
+                else messageBox.innerText = 'НОРМА';
+            }
+
+            // --- обработчики ---
+            rodLever.addEventListener('change', refreshDisplay);
+            pumpLever.addEventListener('change', refreshDisplay);
+            azLever.addEventListener('change', refreshDisplay);
+            condLever.addEventListener('change', refreshDisplay);
+
+            toggle1.addEventListener('change', refreshDisplay);
+            toggle2.addEventListener('change', refreshDisplay);
+            toggle3.addEventListener('change', refreshDisplay);
+            toggle4.addEventListener('change', refreshDisplay);
+            toggle5.addEventListener('change', refreshDisplay);
+            toggle6.addEventListener('change', refreshDisplay);
+            bypass1.addEventListener('change', refreshDisplay);
+            bypass2.addEventListener('change', refreshDisplay);
+
+            ventButton.addEventListener('mousedown', (e) => { e.preventDefault(); ventActive = !ventActive; refreshDisplay(); });
+            turbineButton.addEventListener('mousedown', (e) => { e.preventDefault(); turbinePress = !turbinePress; refreshDisplay(); });
+            reloadButton.addEventListener('mousedown', (e) => { e.preventDefault(); purgeState = !purgeState; refreshDisplay(); });
+            purgeButton.addEventListener('mousedown', (e) => { e.preventDefault(); purgeState = !purgeState; refreshDisplay(); });
+
+            // АЗ-5 сбрасывает многое в безопасное
+            az5big.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                rodLever.checked = true;
+                pumpLever.checked = true;
+                azLever.checked = true;
+                condLever.checked = true;
+                ventActive = false;
+                turbinePress = false;
+                purgeState = false;
+                toggle1.checked = true; toggle2.checked = false; toggle3.checked = true; toggle4.checked = false; toggle5.checked = true; toggle6.checked = false;
+                bypass1.checked = false; bypass2.checked = true;
+                refreshDisplay();
+                messageBox.innerText = 'АЗ-5 АКТИВИРОВАНА';
+                setTimeout(refreshDisplay, 150);
+            });
+
+            // Кнопки с клавиатуры
+            [ventButton, turbineButton, reloadButton, purgeButton].forEach(btn => btn.setAttribute('tabindex', '0'));
+
+            refreshDisplay();
+
+            // --- дополнительный фликер для красных ламп ---
+            setInterval(() => {
+                if (ledAlarm.classList.contains('active-red')) ledAlarm.classList.toggle('flicker');
+                if (ledTemp.classList.contains('active-red')) ledTemp.classList.toggle('flicker');
+            }, 300);
+        })();
+    </script>
+</body>
+              </html>
