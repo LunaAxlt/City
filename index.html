@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Атомный щит · расширенная панель</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Admins President - Система управления звонками</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,628 +11,689 @@
         }
 
         body {
-            background: linear-gradient(145deg, #0a141f 0%, #1c2c38 100%);
-            min-height: 100vh;
+            background: linear-gradient(145deg, #0a2f3a 0%, #06313a 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Poppins', system-ui, sans-serif;
             margin: 0;
+            min-height: 100vh;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
-            padding: 16px;
         }
 
-        /* Главный щит — ещё массивнее */
-        .reactor-panel {
-            background: #264653;
-            background-image: radial-gradient(circle at 15% 30%, #3d6275 2px, transparent 2px),
-                              radial-gradient(circle at 80% 70%, #3d6275 2px, transparent 2px);
-            background-size: 45px 45px;
-            border: 10px solid #6d8f9c;
-            border-radius: 70px 70px 50px 50px;
-            box-shadow: 0 25px 35px rgba(0, 0, 0, 0.8), inset 0 -6px 10px #1a2d38, inset 0 6px 12px #a2cfec;
-            padding: 35px 40px 40px 40px;
-            max-width: 1200px;
+        /* Основной контейнер игры */
+        .game-container {
+            max-width: 1400px;
             width: 100%;
+            background: rgba(255,255,240,0.1);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            padding: 20px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,215,0,0.3);
         }
 
-        /* Верхняя панель индикации — теперь 8 ламп */
-        .indicator-strip {
-            background: #1c2d37;
-            border-radius: 60px 60px 30px 30px;
-            padding: 18px 25px 12px 25px;
-            margin-bottom: 30px;
-            border: 3px solid #4d7386;
-            box-shadow: inset 0 3px 10px #0a151b;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 20px 25px;
+        /* Панель входа / дашборд */
+        .auth-panel, .dashboard {
+            background: #fef9e8;
+            border-radius: 36px;
+            padding: 20px 28px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+            transition: all 0.2s;
         }
 
-        .led-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 70px;
+        .hidden {
+            display: none;
         }
 
-        .led-label {
-            color: #c0e6ff;
-            font-weight: 700;
-            font-size: 0.85rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            background: #10222b;
-            padding: 5px 14px;
-            border-radius: 30px;
-            margin-bottom: 8px;
-            border: 2px solid #3a6c84;
-            white-space: nowrap;
-            box-shadow: inset 0 1px 3px #6a9fbb;
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 2.4rem;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
         }
 
-        .led {
-            width: 40px;
-            height: 40px;
-            background: #2b1f14;
-            border-radius: 50%;
-            border: 4px solid #7a99aa;
-            box-shadow: 0 0 8px #ffd966, inset 0 0 6px black;
-            transition: background 0.07s, box-shadow 0.1s;
+        .sub {
+            color: #2c5a6e;
+            font-weight: 500;
+            border-left: 4px solid #ffb347;
+            padding-left: 15px;
+            margin-bottom: 25px;
         }
 
-        .led.active-green { background: #1effbc; box-shadow: 0 0 26px #3eff9e, inset 0 0 8px white; border-color: #d4ffd4; }
-        .led.active-yellow { background: #ffe066; box-shadow: 0 0 26px #ffbb33, inset 0 0 8px white; border-color: #fff3b0; }
-        .led.active-red { background: #ff5e5e; box-shadow: 0 0 30px #ff3232, inset 0 0 10px white; border-color: #ffc1c1; }
-        .led.active-blue { background: #3bc0ff; box-shadow: 0 0 30px #0088ff, inset 0 0 10px white; border-color: #b5e4ff; }
-        .led.flicker { animation: flicker 0.2s infinite alternate; }
-
-        @keyframes flicker {
-            0% { opacity: 1; box-shadow: 0 0 30px currentColor; }
-            100% { opacity: 0.4; box-shadow: 0 0 8px currentColor; }
-        }
-
-        /* основная секция — теперь 4 колонки */
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px 20px;
-            margin-bottom: 35px;
-        }
-
-        /* карточка управления */
-        .control-card {
-            background: #2a404f;
-            border-radius: 35px 35px 28px 28px;
-            padding: 22px 12px 18px 12px;
-            border: 4px solid #5c8398;
-            box-shadow: inset 0 -4px 0 #1b2d38, inset 0 3px 12px #addbff, 0 7px 0 #0f222b;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .card-title {
-            color: #f0fbff;
-            font-weight: 800;
-            font-size: 1.2rem;
-            text-shadow: 0 2px 0 #12232e;
-            background: #213946;
-            padding: 6px 18px;
-            border-radius: 40px;
-            margin-top: -38px;
-            margin-bottom: 18px;
-            border: 3px solid #679bb3;
-            box-shadow: inset 0 1px 4px #d2f0ff;
-        }
-
-        .value-display {
-            background: #11232b;
-            color: #7ff5ff;
-            font-family: 'Courier New', monospace;
-            font-size: 2.2rem;
-            font-weight: 700;
-            padding: 8px 0px 4px 0px;
+        .login-box {
+            background: #fff6e5;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 450px;
+            margin: 20px auto;
             text-align: center;
-            border-radius: 25px;
-            width: 100%;
-            margin: 6px 0 16px 0;
-            border: 3px solid #2b7f9c;
-            box-shadow: inset 0 0 22px #001c26;
-            letter-spacing: 3px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
 
-        /* рычаги (более массивные) */
-        .lever-switch {
-            position: relative;
-            width: 90px;
-            height: 125px;
-            margin: 8px auto 12px;
-        }
-
-        .lever-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-            position: absolute;
-        }
-
-        .lever-body {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #6b5c4b;
-            border-radius: 50px 50px 25px 25px;
-            border: 4px solid #efcba1;
-            box-shadow: inset 0 -18px 0 #4d3f33, 0 8px 0 #3a2f25;
-            cursor: pointer;
-            transition: 0.08s;
-        }
-
-        .lever-handle {
-            position: absolute;
-            width: 32px;
-            height: 70px;
-            background: linear-gradient(145deg, #f5dfc0, #ccb191);
-            border: 4px solid #6f5d49;
-            border-radius: 40px;
-            bottom: 25px;
-            left: 25px;
-            box-shadow: 0 6px 0 #8b7761;
-            transform-origin: bottom center;
-            transition: transform 0.15s ease-out;
-            transform: rotate(0deg);
-        }
-
-        .lever-switch input:checked + .lever-body .lever-handle {
-            transform: rotate(38deg);
-            box-shadow: 0 3px 0 #8b7761;
-        }
-
-        /* тумблеры (маленькие рычажки) */
-        .toggle-bank {
-            display: flex;
-            gap: 18px;
-            justify-content: center;
-            margin: 12px 0;
-        }
-        .mini-toggle {
-            position: relative;
-            width: 38px;
-            height: 58px;
-        }
-        .mini-toggle input {
-            opacity: 0;
-            position: absolute;
-        }
-        .toggle-body {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #414a51;
-            border-radius: 20px 20px 8px 8px;
-            border: 3px solid #8499a6;
-            box-shadow: inset 0 -8px 0 #262e34, 0 3px 0 #2b3339;
-            cursor: pointer;
-        }
-        .toggle-handle {
-            position: absolute;
-            width: 22px;
-            height: 28px;
-            background: #b3c7d6;
-            border: 3px solid #3c5b6b;
-            border-radius: 12px;
-            bottom: 10px;
-            left: 5px;
-            transform-origin: bottom center;
-            transition: transform 0.1s;
-            transform: rotate(0deg);
-        }
-        .mini-toggle input:checked + .toggle-body .toggle-handle {
-            transform: rotate(30deg);
-            background: #ffe28a;
-        }
-
-        /* кнопки (круглые, разных цветов) */
-        .big-button {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 6px solid #b0d2e6;
-            box-shadow: 0 10px 0 #253946, inset 0 -8px 8px #1c3b4a, inset 0 8px 12px #ebffff;
-            cursor: pointer;
-            transition: 0.06s linear;
-            margin: 8px auto 12px;
-        }
-        .big-button:active {
-            transform: translateY(7px);
-            box-shadow: 0 3px 0 #253946, inset 0 -4px 6px #1c3b4a, inset 0 8px 12px #ebffff;
-        }
-        .button-red { background: #ad3a3a; border-color: #ffaeae; }
-        .button-yellow { background: #cf9f2e; border-color: #ffe49e; }
-        .button-blue { background: #2f7799; border-color: #b2e4ff; }
-        .button-green { background: #2b7a4b; border-color: #b3ffcf; }
-
-        .button-label {
-            color: white;
-            font-weight: 700;
-            font-size: 0.9rem;
-            background: #1d3d4d;
-            padding: 4px 12px;
-            border-radius: 30px;
-            border: 2px solid #83adc2;
-        }
-
-        /* нижняя панель — ещё больше индикации */
-        .power-indicator {
-            display: flex;
-            justify-content: space-between;
-            background: #0e2833;
-            border-radius: 60px;
-            padding: 22px 35px;
-            border: 4px solid #2f718b;
-            box-shadow: inset 0 2px 18px black;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .core-status {
-            display: flex;
-            gap: 35px;
-            color: #ade4ff;
-            font-weight: 700;
-            font-size: 1.4rem;
-        }
-        .core-status span {
-            background: #10333f;
-            padding: 12px 22px;
-            border-radius: 60px;
-            border: 3px solid #279fc7;
-            font-family: 'Courier New', monospace;
-        }
-
-        .emergency-btn {
-            background: #b63434;
-            border-radius: 60px;
-            padding: 14px 28px;
-            font-weight: 900;
-            font-size: 1.6rem;
-            color: white;
-            border-bottom: 7px solid #631919;
-            letter-spacing: 4px;
-            cursor: pointer;
-            transition: 0.05s;
-            box-shadow: 0 0 22px #ff7b7b;
-            border-top: none;
-            border-left: none;
-            border-right: none;
-        }
-        .emergency-btn:active { transform: translateY(6px); border-bottom-width: 2px; }
-
-        .info-message {
-            color: #b9e2ff;
+        .login-box input {
+            width: 90%;
+            padding: 14px 18px;
             font-size: 1.2rem;
-            background: #1b3e4ed9;
-            border-radius: 40px;
+            border: 2px solid #e0cba0;
+            border-radius: 60px;
+            background: white;
+            text-align: center;
+            margin: 12px 0;
+            font-weight: bold;
+        }
+
+        button {
+            background: #2c5a6e;
+            border: none;
+            color: white;
+            font-weight: bold;
             padding: 12px 28px;
-            border: 3px solid #50c0ff;
-            font-weight: 600;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin: 5px;
         }
 
-        .extra-leds {
+        button:hover {
+            background: #1f4456;
+            transform: scale(0.97);
+        }
+
+        .gold-btn {
+            background: #d4af37;
+            color: #1e2f3a;
+        }
+
+        .grid-forms {
             display: flex;
-            gap: 18px;
-            margin-top: 8px;
-        }
-        .mini-led {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #221d16;
-            border: 2px solid gray;
-            transition: 0.07s;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-top: 20px;
         }
 
-        footer { color: #386277; margin-top: 24px; text-align: center; font-size: 0.9rem; font-weight: 500; }
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 18px 22px;
+            flex: 1;
+            min-width: 280px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            border-bottom: 3px solid #ffb347;
+            display: inline-block;
+            margin-top: 0;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            margin: 8px 0;
+            border-radius: 28px;
+            border: 1px solid #ccc;
+            font-family: inherit;
+        }
+
+        textarea {
+            border-radius: 20px;
+            resize: vertical;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 24px;
+            background: #fff1e0;
+            padding: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fffaf2;
+            border-radius: 20px;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #eeddbb;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: #d9c48b;
+            color: #1e2f2f;
+        }
+
+        .badge {
+            background: #2a7f6e;
+            color: white;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .footer-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 780px) {
+            .game-container { padding: 10px; }
+            th, td { font-size: 0.7rem; }
+        }
     </style>
 </head>
 <body>
-    <div class="reactor-panel">
-        <!-- Верхняя полоса: теперь 8 светодиодов -->
-        <div class="indicator-strip">
-            <div class="led-group"><span class="led-label">РОД-1</span><div id="ledRod1" class="led active-green"></div></div>
-            <div class="led-group"><span class="led-label">РОД-2</span><div id="ledRod2" class="led active-green"></div></div>
-            <div class="led-group"><span class="led-label">НАСОС</span><div id="ledPump" class="led active-green"></div></div>
-            <div class="led-group"><span class="led-label">ДАВЛ.</span><div id="ledPress" class="led"></div></div>
-            <div class="led-group"><span class="led-label">ТЕМП.</span><div id="ledTemp" class="led"></div></div>
-            <div class="led-group"><span class="led-label">ТУРБ.</span><div id="ledTurb" class="led"></div></div>
-            <div class="led-group"><span class="led-label">АВАРИЯ</span><div id="ledAlarm" class="led"></div></div>
-            <div class="led-group"><span class="led-label">КОНТР.</span><div id="ledControl" class="led active-blue"></div></div>
+<div class="game-container" id="gameRoot">
+    <!-- Панель авторизации -->
+    <div id="authPanel" class="auth-panel">
+        <div style="text-align: center;">
+            <h1>🏛️ ADMINS PRESIDENT 🏛️</h1>
+            <div class="sub">Вход в правительственную сеть связи</div>
         </div>
-
-        <!-- ОСНОВНАЯ СЕТКА: теперь 4x3 = 12 элементов управления -->
-        <div class="controls-grid">
-            <!-- 1. Рычаг стержней -->
-            <div class="control-card"><div class="card-title">СТЕРЖНИ АЗ</div><div id="rodValue" class="value-display">68%</div>
-                <label class="lever-switch"><input type="checkbox" id="rodLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
-                <span style="color:#b5defa;">группа 1</span></div>
-
-            <!-- 2. Рычаг насосов -->
-            <div class="control-card"><div class="card-title">ГЦН</div><div id="pumpValue" class="value-display">92%</div>
-                <label class="lever-switch"><input type="checkbox" id="pumpLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
-                <span style="color:#b5defa;">4 насоса</span></div>
-
-            <!-- 3. Кнопка красная (аварийная вентиляция) -->
-            <div class="control-card"><div class="card-title">ВЕНТИЛ.</div><div id="ventValue" class="value-display">ВЫКЛ</div>
-                <div class="big-button button-red" id="ventButton" tabindex="0"></div><span class="button-label" id="ventLabel">АВАРИЯ</span></div>
-
-            <!-- 4. Тумблеры (целых три!) -->
-            <div class="control-card"><div class="card-title">СЕКТОРЫ</div><div class="toggle-bank">
-                <label class="mini-toggle"><input type="checkbox" id="toggle1" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-                <label class="mini-toggle"><input type="checkbox" id="toggle2"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-                <label class="mini-toggle"><input type="checkbox" id="toggle3" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-            </div><span style="color:#b5defa;">резерв 1-3</span></div>
-
-            <!-- 5. Кнопка желтая (турбина) -->
-            <div class="control-card"><div class="card-title">ТУРБИНА</div><div id="turbineValue" class="value-display">80%</div>
-                <div class="big-button button-yellow" id="turbineButton" tabindex="0"></div><span class="button-label" id="turbineLabel">СБРОС</span></div>
-
-            <!-- 6. Рычаг АЗ-5 (дубль) -->
-            <div class="control-card"><div class="card-title">АЗ-5</div><div id="azValue" class="value-display">ВЗВЕД</div>
-                <label class="lever-switch"><input type="checkbox" id="azLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
-                <span style="color:#b5defa;">быстрый стоп</span></div>
-
-            <!-- 7. Кнопка синяя (перегрузка) -->
-            <div class="control-card"><div class="card-title">ПЕРЕГР.</div><div id="reloadValue" class="value-display">СТОП</div>
-                <div class="big-button button-blue" id="reloadButton" tabindex="0"></div><span class="button-label" id="reloadLabel">ЗАПУСК</span></div>
-
-            <!-- 8. Еще три тумблера (4-6) -->
-            <div class="control-card"><div class="card-title">ФИДЕРЫ</div><div class="toggle-bank">
-                <label class="mini-toggle"><input type="checkbox" id="toggle4"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-                <label class="mini-toggle"><input type="checkbox" id="toggle5" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-                <label class="mini-toggle"><input type="checkbox" id="toggle6"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-            </div><span style="color:#b5defa;">секции</span></div>
-
-            <!-- 9. Доп. рычаг (конденсат) -->
-            <div class="control-card"><div class="card-title">КОНДЕНС.</div><div id="condValue" class="value-display">73%</div>
-                <label class="lever-switch"><input type="checkbox" id="condLever" checked><span class="lever-body"><span class="lever-handle"></span></span></label>
-                <span style="color:#b5defa;">отвод тепла</span></div>
-
-            <!-- 10. Кнопка зеленая (продувка) -->
-            <div class="control-card"><div class="card-title">ПРОДУВ</div><div id="purgeValue" class="value-display">0%</div>
-                <div class="big-button button-green" id="purgeButton" tabindex="0"></div><span class="button-label" id="purgeLabel">Гелий</span></div>
-
-            <!-- 11. Два больших вертикальных тумблера (имитация) -->
-            <div class="control-card"><div class="card-title">БАЙПАС</div><div class="toggle-bank">
-                <label class="mini-toggle"><input type="checkbox" id="bypass1"><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-                <label class="mini-toggle"><input type="checkbox" id="bypass2" checked><span class="toggle-body"><span class="toggle-handle"></span></span></label>
-            </div><span style="color:#b5defa;">1/2</span></div>
-
-            <!-- 12. Индикаторная панель с мелкими лампочками -->
-            <div class="control-card"><div class="card-title">ЛАМПЫ</div><div class="extra-leds">
-                <div id="mini1" class="mini-led active-green"></div><div id="mini2" class="mini-led"></div><div id="mini3" class="mini-led active-red"></div>
-                <div id="mini4" class="mini-led active-yellow"></div>
-            </div><span style="color:#b5defa;">диагност</span></div>
+        <div class="login-box">
+            <span style="font-size: 2rem;">📞</span>
+            <p style="color: #3a6b47; font-weight: bold;">Введите пароль для доступа</p>
+            <input type="password" id="passwordInput" placeholder="Пароль" autocomplete="off">
+            <button id="loginBtn">Войти в систему 🔑</button>
+            <div style="margin-top: 12px; font-size: 0.8rem; color: #b45f1b;">* демо-пароль: 1234</div>
         </div>
-
-        <!-- Нижняя панель — куча циферок и кнопка -->
-        <div class="power-indicator">
-            <div class="core-status">
-                <span id="corePower">⚡ 97%</span>
-                <span id="coreTemp">🌡 347°C</span>
-                <span id="corePress">⏢ 7.2 Bar</span>
-            </div>
-            <button class="emergency-btn" id="az5button">АЗ-5</button>
-            <div id="messageBox" class="info-message">СТАБИЛЬНО</div>
-        </div>
-        <footer>🔴 ЩИТ УПРАВЛЕНИЯ ЭНЕРГОБЛОКА №4 | 16 РЕЖИМОВ 🔴</footer>
     </div>
 
-    <script>
-        (function() {
-            // --- Состояния (множество элементов) ---
-            let rodIn = true, pumpOn = true, ventActive = false, azArmed = true, turbinePress = false;
-            let condLeverState = true; // конденсат
-            let purgeState = false;     // продувка
-            // тумблеры (6 штук)
-            let toggles = [true, false, true, false, true, false]; // индексы 0-5
-            let bypass = [false, true];
+    <!-- Главная панель управления (после входа) -->
+    <div id="dashboard" class="dashboard hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>📋 ADMINS PRESIDENT</h1>
+                <div class="sub">Панель управления звонками • Президентский указ</div>
+            </div>
+            <button id="logoutBtn" style="background:#a03e2c;">🚪 Выйти</button>
+        </div>
 
-            // ссылки на новые элементы
-            const rodLever = document.getElementById('rodLever');
-            const pumpLever = document.getElementById('pumpLever');
-            const azLever = document.getElementById('azLever');
-            const condLever = document.getElementById('condLever');
-            const ventButton = document.getElementById('ventButton');
-            const turbineButton = document.getElementById('turbineButton');
-            const reloadButton = document.getElementById('reloadButton');
-            const purgeButton = document.getElementById('purgeButton');
-            const az5big = document.getElementById('az5button');
+        <div class="grid-forms">
+            <!-- Левая форма: Добавление нового звонка / контакта -->
+            <div class="card">
+                <h3>✍️ Новое обращение / звонок</h3>
+                <label>📞 Номер телефона (левый / любой)</label>
+                <input type="text" id="phoneNumber" placeholder="+7 999 123-45-67" value="+7 900 111-22-33">
 
-            // тумблеры
-            const toggle1 = document.getElementById('toggle1');
-            const toggle2 = document.getElementById('toggle2');
-            const toggle3 = document.getElementById('toggle3');
-            const toggle4 = document.getElementById('toggle4');
-            const toggle5 = document.getElementById('toggle5');
-            const toggle6 = document.getElementById('toggle6');
-            const bypass1 = document.getElementById('bypass1');
-            const bypass2 = document.getElementById('bypass2');
+                <label>👤 ФИО (Гражданин / Сотрудник)</label>
+                <input type="text" id="fullName" placeholder="Иванов Иван Иванович">
 
-            // дисплеи
-            const rodValue = document.getElementById('rodValue');
-            const pumpValue = document.getElementById('pumpValue');
-            const ventValue = document.getElementById('ventValue');
-            const turbineValue = document.getElementById('turbineValue');
-            const azValue = document.getElementById('azValue');
-            const reloadValue = document.getElementById('reloadValue');
-            const condValue = document.getElementById('condValue');
-            const purgeValue = document.getElementById('purgeValue');
-            const corePower = document.getElementById('corePower');
-            const coreTemp = document.getElementById('coreTemp');
-            const corePress = document.getElementById('corePress');
-            const messageBox = document.getElementById('messageBox');
+                <label>🏷️ Статус / Категория</label>
+                <select id="statusSelect">
+                    <option value="Гражданин">Гражданин</option>
+                    <option value="Госслужба">Госслужба</option>
+                    <option value="Администрация района">Администрация района</option>
+                    <option value="Администрация области">Администрация области</option>
+                </select>
 
-            // лампочки (8 верхних + 4 mini)
-            const ledRod1 = document.getElementById('ledRod1');
-            const ledRod2 = document.getElementById('ledRod2');
-            const ledPump = document.getElementById('ledPump');
-            const ledPress = document.getElementById('ledPress');
-            const ledTemp = document.getElementById('ledTemp');
-            const ledTurb = document.getElementById('ledTurb');
-            const ledAlarm = document.getElementById('ledAlarm');
-            const ledControl = document.getElementById('ledControl');
-            const mini1 = document.getElementById('mini1');
-            const mini2 = document.getElementById('mini2');
-            const mini3 = document.getElementById('mini3');
-            const mini4 = document.getElementById('mini4');
+                <label>⭐ Префикс важности (приоритет)</label>
+                <select id="prefixSelect">
+                    <option value="Президент">👑 Президент</option>
+                    <option value="Правительство области">🏛️ Правительство области</option>
+                    <option value="Администрация">📌 Администрация</option>
+                    <option value="Фейк">⚠️ Фейк</option>
+                    <option value="Не особо важно">📉 Не особо важно</option>
+                </select>
 
-            // --- Функция обновления всего и вся ---
-            function refreshDisplay() {
-                // считываем рычаги
-                rodIn = rodLever.checked;
-                pumpOn = pumpLever.checked;
-                azArmed = azLever.checked;
-                condLeverState = condLever.checked;
+                <label>🗺️ Выбор области</label>
+                <select id="regionSelect">
+                    <option value="Московская область">Московская область</option>
+                    <option value="Ленинградская область">Ленинградская область</option>
+                    <option value="Краснодарский край">Краснодарский край</option>
+                    <option value="Свердловская область">Свердловская область</option>
+                    <option value="Татарстан">Республика Татарстан</option>
+                    <option value="Новосибирская область">Новосибирская область</option>
+                </select>
 
-                // тумблеры
-                toggles[0] = toggle1.checked;
-                toggles[1] = toggle2.checked;
-                toggles[2] = toggle3.checked;
-                toggles[3] = toggle4.checked;
-                toggles[4] = toggle5.checked;
-                toggles[5] = toggle6.checked;
-                bypass[0] = bypass1.checked;
-                bypass[1] = bypass2.checked;
+                <label>🏘️ Населенный пункт</label>
+                <input type="text" id="cityTown" placeholder="город / село" value="Центральный">
 
-                // обновление текстовых значений
-                rodValue.innerText = rodIn ? '68%' : '32%';
-                pumpValue.innerText = pumpOn ? '92%' : '41%';
-                azValue.innerText = azArmed ? 'ВЗВЕД' : 'СНЯТ';
-                condValue.innerText = condLeverState ? '73%' : '28%';
-                ventValue.innerText = ventActive ? 'ВКЛ' : 'ВЫКЛ';
-                document.getElementById('ventLabel').innerText = ventActive ? 'ОТКЛ' : 'АВАРИЯ';
-                turbineValue.innerText = turbinePress ? '68%' : '80%';
-                reloadValue.innerText = purgeState ? 'АКТИВ' : 'СТОП';  // используем purge для примера
-                document.getElementById('reloadLabel').innerText = purgeState ? 'ОТКЛ' : 'ЗАПУСК';
-                purgeValue.innerText = purgeState ? '65%' : '0%';
-                document.getElementById('purgeLabel').innerText = purgeState ? 'СТОП' : 'Гелий';
+                <label>⏰ Время перезвона (дни, 0-3)</label>
+                <input type="number" id="callbackDays" min="0" max="3" step="1" value="1">
 
-                // --- РАСЧЁТ ПАРАМЕТРОВ РЕАКТОРА (запутанный, много зависимостей) ---
-                let basePower = 97;
-                if (!rodIn) basePower += 20; else basePower -= 5;
-                if (!pumpOn) basePower -= 28; else basePower += 4;
-                if (ventActive) basePower += 3; else basePower -= 2;
-                if (!azArmed) basePower += 35;
-                if (turbinePress) basePower -= 15;
-                if (!condLeverState) basePower -= 12;
-                if (purgeState) basePower += 5; else basePower -= 1;
-                // влияние тумблеров (чем больше включено, тем выше мощность)
-                let toggleCount = toggles.filter(v => v).length;
-                basePower += (toggleCount - 3) * 3;  // -3 .. +6
-                if (bypass[0] && bypass[1]) basePower += 5;
-                else if (!bypass[0] && !bypass[1]) basePower -= 4;
+                <label>📝 Описание звонка / суть обращения</label>
+                <textarea id="description" rows="2" placeholder="Жалоба, предложение, доклад..."></textarea>
 
-                // ограничение
-                basePower = Math.min(148, Math.max(12, basePower));
-                let displayPower = Math.round(basePower);
-                let temp = 347 + (displayPower - 97) * 2.6;
-                temp = Math.min(610, Math.max(190, Math.round(temp)));
-                let press = (7.2 + (temp - 347) * 0.02).toFixed(1);
-                if (press < 3) press = 3;
-                if (press > 12) press = 12;
+                <button id="addRecordBtn" class="gold-btn">➕ Добавить в реестр</button>
+            </div>
 
-                corePower.innerText = `⚡ ${displayPower}%`;
-                coreTemp.innerText = `🌡 ${temp}°C`;
-                corePress.innerText = `⏢ ${press} Bar`;
+            <!-- Правая карточка: фильтры и статистика -->
+            <div class="card">
+                <h3>🔍 Фильтрация & Статистика</h3>
+                <label>Фильтр по префиксу</label>
+                <select id="filterPrefix">
+                    <option value="all">Все префиксы</option>
+                    <option value="Президент">Президент</option>
+                    <option value="Правительство области">Правительство области</option>
+                    <option value="Администрация">Администрация</option>
+                    <option value="Фейк">Фейк</option>
+                    <option value="Не особо важно">Не особо важно</option>
+                </select>
+                <label>Фильтр по области</label>
+                <select id="filterRegion">
+                    <option value="all">Все области</option>
+                    <option value="Московская область">Московская область</option>
+                    <option value="Ленинградская область">Ленинградская область</option>
+                    <option value="Краснодарский край">Краснодарский край</option>
+                    <option value="Свердловская область">Свердловская область</option>
+                    <option value="Татарстан">Татарстан</option>
+                    <option value="Новосибирская область">Новосибирская область</option>
+                </select>
+                <button id="applyFilterBtn">Применить фильтр</button>
+                <button id="resetFilterBtn">Сбросить</button>
+                <div style="margin-top: 15px; background:#e7dbbc; border-radius: 28px; padding: 12px;">
+                    <div>📊 Всего записей: <strong id="totalCount">0</strong></div>
+                    <div>⭐ Президентских: <strong id="presidentCount">0</strong></div>
+                    <div>🏛️ Правительство области: <strong id="govRegionCount">0</strong></div>
+                </div>
+                <button id="clearAllBtn" style="background:#8b5a2b; margin-top:12px;">⚠️ Очистить все записи</button>
+            </div>
+        </div>
 
-                // --- ВЕРХНИЕ LED (8 штук) ---
-                ledRod1.className = 'led ' + (rodIn ? 'active-green' : 'active-yellow');
-                ledRod2.className = 'led ' + (rodIn ? (toggleCount>3?'active-green':'active-green') : 'active-yellow'); // просто второй
-                ledPump.className = 'led ' + (pumpOn ? 'active-green' : 'active-red');
-                // давление
-                if (press > 10.2) ledPress.className = 'led active-red';
-                else if (press > 8.5) ledPress.className = 'led active-yellow';
-                else ledPress.className = 'led active-green';
-                // температура
-                if (temp > 520) ledTemp.className = 'led active-red flicker';
-                else if (temp > 430) ledTemp.className = 'led active-yellow';
-                else ledTemp.className = 'led active-green';
-                // турбина
-                ledTurb.className = 'led ' + (turbinePress ? 'active-yellow' : (displayPower > 110 ? 'active-red' : 'active-green'));
-                // авария общая
-                if (displayPower > 125 || temp > 560) ledAlarm.className = 'led active-red flicker';
-                else if (displayPower > 105 || temp > 470) ledAlarm.className = 'led active-yellow';
-                else ledAlarm.className = 'led';
-                // контрольная (мигает если много тумблеров)
-                ledControl.className = 'led ' + (toggleCount > 4 ? 'active-blue flicker' : 'active-blue');
+        <!-- Таблица всех звонков -->
+        <div class="table-wrapper">
+            <h3>📋 Журнал звонков / Обращений (Президентский реестр)</h3>
+            <table id="callsTable">
+                <thead>
+                    <tr><th>Телефон</th><th>ФИО</th><th>Статус</th><th>Префикс</th><th>Область</th><th>Нас. пункт</th><th>Перезвон (дни)</th><th>Описание</th><th>Действие</th></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="9" style="text-align:center;">Нет данных. Добавьте первый звонок.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer-actions">
+            <small>🔹 Система Admins President — реальные полномочия | Время перезвона 0-3 дня</small>
+        </div>
+    </div>
+</div>
 
-                // мини лампочки в карточке
-                mini1.className = 'mini-led ' + (rodIn ? 'active-green' : '');
-                mini2.className = 'mini-led ' + (pumpOn ? 'active-green' : '');
-                mini3.className = 'mini-led ' + (ventActive ? 'active-red' : 'active-red'); // всегда красная для красоты
-                mini4.className = 'mini-led ' + (azArmed ? 'active-yellow' : 'active-yellow');
+<script>
+    // --- Хранилище данных (ключ localStorage) ---
+    const STORAGE_KEY = 'admins_president_calls';
 
-                // сообщение
-                if (displayPower > 128 || temp > 570) messageBox.innerText = '⚠️ РАЗРУШЕНИЕ ⚠️';
-                else if (displayPower > 108 || temp > 490) messageBox.innerText = '❗ АВАРИЯ ❗';
-                else if (!azArmed) messageBox.innerText = 'АЗ СНЯТА!';
-                else if (toggleCount > 5) messageBox.innerText = 'ПЕРЕГРУЗКА';
-                else messageBox.innerText = 'НОРМА';
-            }
+    // Глобальный массив звонков
+    let callsArray = [];
 
-            // --- обработчики ---
-            rodLever.addEventListener('change', refreshDisplay);
-            pumpLever.addEventListener('change', refreshDisplay);
-            azLever.addEventListener('change', refreshDisplay);
-            condLever.addEventListener('change', refreshDisplay);
+    // DOM элементы
+    const authPanel = document.getElementById('authPanel');
+    const dashboard = document.getElementById('dashboard');
+    const loginBtn = document.getElementById('loginBtn');
+    const passwordInput = document.getElementById('passwordInput');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const addRecordBtn = document.getElementById('addRecordBtn');
+    const tableBody = document.getElementById('tableBody');
+    const applyFilterBtn = document.getElementById('applyFilterBtn');
+    const resetFilterBtn = document.getElementById('resetFilterBtn');
+    const filterPrefixSelect = document.getElementById('filterPrefix');
+    const filterRegionSelect = document.getElementById('filterRegion');
+    const totalCountSpan = document.getElementById('totalCount');
+    const presidentCountSpan = document.getElementById('presidentCount');
+    const govRegionCountSpan = document.getElementById('govRegionCount');
+    const clearAllBtn = document.getElementById('clearAllBtn');
 
-            toggle1.addEventListener('change', refreshDisplay);
-            toggle2.addEventListener('change', refreshDisplay);
-            toggle3.addEventListener('change', refreshDisplay);
-            toggle4.addEventListener('change', refreshDisplay);
-            toggle5.addEventListener('change', refreshDisplay);
-            toggle6.addEventListener('change', refreshDisplay);
-            bypass1.addEventListener('change', refreshDisplay);
-            bypass2.addEventListener('change', refreshDisplay);
+    // Поля ввода
+    const phoneInput = document.getElementById('phoneNumber');
+    const fullNameInput = document.getElementById('fullName');
+    const statusSelect = document.getElementById('statusSelect');
+    const prefixSelect = document.getElementById('prefixSelect');
+    const regionSelect = document.getElementById('regionSelect');
+    const cityInput = document.getElementById('cityTown');
+    const callbackDaysInput = document.getElementById('callbackDays');
+    const descInput = document.getElementById('description');
 
-            ventButton.addEventListener('mousedown', (e) => { e.preventDefault(); ventActive = !ventActive; refreshDisplay(); });
-            turbineButton.addEventListener('mousedown', (e) => { e.preventDefault(); turbinePress = !turbinePress; refreshDisplay(); });
-            reloadButton.addEventListener('mousedown', (e) => { e.preventDefault(); purgeState = !purgeState; refreshDisplay(); });
-            purgeButton.addEventListener('mousedown', (e) => { e.preventDefault(); purgeState = !purgeState; refreshDisplay(); });
+    // ---- вспомогательные функции ----
+    function saveToLocalStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(callsArray));
+    }
 
-            // АЗ-5 сбрасывает многое в безопасное
-            az5big.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                rodLever.checked = true;
-                pumpLever.checked = true;
-                azLever.checked = true;
-                condLever.checked = true;
-                ventActive = false;
-                turbinePress = false;
-                purgeState = false;
-                toggle1.checked = true; toggle2.checked = false; toggle3.checked = true; toggle4.checked = false; toggle5.checked = true; toggle6.checked = false;
-                bypass1.checked = false; bypass2.checked = true;
-                refreshDisplay();
-                messageBox.innerText = 'АЗ-5 АКТИВИРОВАНА';
-                setTimeout(refreshDisplay, 150);
+    function loadFromLocalStorage() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                callsArray = JSON.parse(stored);
+            } catch(e) { callsArray = []; }
+        } else {
+            // демо-записи для примера
+            callsArray = [
+                {
+                    id: Date.now()+1,
+                    phone: "+7 916 555 12 34",
+                    fullName: "Алексей Дроздов",
+                    status: "Госслужба",
+                    prefix: "Правительство области",
+                    region: "Московская область",
+                    city: "Одинцово",
+                    callbackDays: 1,
+                    description: "Запрос на выделение финансирования района"
+                },
+                {
+                    id: Date.now()+2,
+                    phone: "+7 921 777 88 99",
+                    fullName: "Елена Президентская",
+                    status: "Администрация области",
+                    prefix: "Президент",
+                    region: "Ленинградская область",
+                    city: "Гатчина",
+                    callbackDays: 0,
+                    description: "Срочный доклад по обороне"
+                },
+                {
+                    id: Date.now()+3,
+                    phone: "+7 495 000 11 22",
+                    fullName: "Фейк Фейкович",
+                    status: "Гражданин",
+                    prefix: "Фейк",
+                    region: "Краснодарский край",
+                    city: "Сочи",
+                    callbackDays: 2,
+                    description: "Ложное сообщение о ЧП"
+                }
+            ];
+            saveToLocalStorage();
+        }
+        renderTableAndStats();
+    }
+
+    // Рендер таблицы с учетом активных фильтров
+    let currentFilterPrefix = "all";
+    let currentFilterRegion = "all";
+
+    function getFilteredCalls() {
+        return callsArray.filter(call => {
+            let prefixMatch = (currentFilterPrefix === "all" || call.prefix === currentFilterPrefix);
+            let regionMatch = (currentFilterRegion === "all" || call.region === currentFilterRegion);
+            return prefixMatch && regionMatch;
+        });
+    }
+
+    function updateStats() {
+        const total = callsArray.length;
+        const presidentCount = callsArray.filter(c => c.prefix === "Президент").length;
+        const govRegionCount = callsArray.filter(c => c.prefix === "Правительство области").length;
+        totalCountSpan.innerText = total;
+        presidentCountSpan.innerText = presidentCount;
+        govRegionCountSpan.innerText = govRegionCount;
+    }
+
+    function renderTableAndStats() {
+        const filtered = getFilteredCalls();
+        updateStats();
+        if (filtered.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">📭 Нет записей по заданным фильтрам</td></tr>';
+            return;
+        }
+        let html = '';
+        filtered.forEach(call => {
+            html += `<tr>
+                        <td>${escapeHtml(call.phone)}</td>
+                        <td>${escapeHtml(call.fullName)}</td>
+                        <td><span class="badge" style="background:#4f6d5e;">${escapeHtml(call.status)}</span></td>
+                        <td><strong style="color:${getPrefixColor(call.prefix)}">${escapeHtml(call.prefix)}</strong></td>
+                        <td>${escapeHtml(call.region)}</td>
+                        <td>${escapeHtml(call.city)}</td>
+                        <td>${call.callbackDays} дн.</td>
+                        <td style="max-width:200px; overflow-wrap:break-word;">${escapeHtml(call.description || '—')}</td>
+                        <td><button class="delete-btn" data-id="${call.id}" style="background:#c06c3e; padding:6px 12px;">🗑️ Удалить</button></td>
+                    </tr>`;
+        });
+        tableBody.innerHTML = html;
+        // добавить обработчики на кнопки удаления
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                deleteCallById(id);
             });
+        });
+    }
 
-            // Кнопки с клавиатуры
-            [ventButton, turbineButton, reloadButton, purgeButton].forEach(btn => btn.setAttribute('tabindex', '0'));
+    function getPrefixColor(prefix) {
+        switch(prefix) {
+            case 'Президент': return '#b22234';
+            case 'Правительство области': return '#2a7f6e';
+            case 'Администрация': return '#3a6ea5';
+            case 'Фейк': return '#8b5a2b';
+            default: return '#4e6e5e';
+        }
+    }
 
-            refreshDisplay();
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
 
-            // --- дополнительный фликер для красных ламп ---
-            setInterval(() => {
-                if (ledAlarm.classList.contains('active-red')) ledAlarm.classList.toggle('flicker');
-                if (ledTemp.classList.contains('active-red')) ledTemp.classList.toggle('flicker');
-            }, 300);
-        })();
-    </script>
+    function deleteCallById(id) {
+        callsArray = callsArray.filter(call => call.id !== id);
+        saveToLocalStorage();
+        renderTableAndStats();
+    }
+
+    function addNewCall() {
+        // Валидация основных полей (номер телефона и ФИО хоть какие-то)
+        let phone = phoneInput.value.trim();
+        let fullName = fullNameInput.value.trim();
+        if (phone === "") {
+            alert("Введите номер телефона (можно левый)");
+            return;
+        }
+        if (fullName === "") {
+            alert("Укажите ФИО");
+            return;
+        }
+        let callbackDays = parseInt(callbackDaysInput.value);
+        if (isNaN(callbackDays)) callbackDays = 0;
+        if (callbackDays < 0) callbackDays = 0;
+        if (callbackDays > 3) callbackDays = 3;
+        
+        const newCall = {
+            id: Date.now(),
+            phone: phone,
+            fullName: fullName,
+            status: statusSelect.value,
+            prefix: prefixSelect.value,
+            region: regionSelect.value,
+            city: cityInput.value.trim() || "Не указан",
+            callbackDays: callbackDays,
+            description: descInput.value.trim() || "Нет описания"
+        };
+        callsArray.unshift(newCall); // новые сверху
+        saveToLocalStorage();
+        // Очистка некоторых полей для удобства, но можно оставить шаблон
+        phoneInput.value = "";
+        fullNameInput.value = "";
+        descInput.value = "";
+        cityInput.value = "Центральный";
+        callbackDaysInput.value = 1;
+        // статусы и прочее оставляем, но сброс телефона для удобства
+        renderTableAndStats();
+    }
+
+    function clearAllRecords() {
+        if (confirm("⚠️ ВНИМАНИЕ! Вы уверены, что хотите удалить ВСЕ записи о звонках? Это действие необратимо.")) {
+            callsArray = [];
+            saveToLocalStorage();
+            renderTableAndStats();
+        }
+    }
+
+    // Фильтры
+    function applyFilters() {
+        currentFilterPrefix = filterPrefixSelect.value;
+        currentFilterRegion = filterRegionSelect.value;
+        renderTableAndStats();
+    }
+    function resetFilters() {
+        filterPrefixSelect.value = "all";
+        filterRegionSelect.value = "all";
+        currentFilterPrefix = "all";
+        currentFilterRegion = "all";
+        renderTableAndStats();
+    }
+
+    // Сессия входа с паролем 1234
+    function handleLogin() {
+        const pwd = passwordInput.value;
+        if (pwd === "1234") {
+            authPanel.classList.add("hidden");
+            dashboard.classList.remove("hidden");
+            // загрузить данные при успешном входе
+            loadFromLocalStorage();
+        } else {
+            alert("Неверный пароль! Доступ только для президентской администрации. (пароль: 1234)");
+            passwordInput.value = "";
+        }
+    }
+
+    function handleLogout() {
+        dashboard.classList.add("hidden");
+        authPanel.classList.remove("hidden");
+        passwordInput.value = "";
+        // сохранять данные не требуется
+    }
+
+    // Инициализация слушателей
+    function initEventListeners() {
+        loginBtn.addEventListener('click', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+        addRecordBtn.addEventListener('click', addNewCall);
+        applyFilterBtn.addEventListener('click', applyFilters);
+        resetFilterBtn.addEventListener('click', resetFilters);
+        clearAllBtn.addEventListener('click', clearAllRecords);
+        // Нажатие Enter в пароле
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+    }
+
+    // дополнительная проверка при загрузке: если уже залогинены? нет, по умолчанию выходим
+    // но чтобы не хранить сессию, оставим классический вход
+    window.addEventListener('DOMContentLoaded', () => {
+        initEventListeners();
+        // изначально показываем панель входа, данные не подгружаем до входа.
+        // но можем подгрузить для демонстрации сохранённых записей? подгрузим в память, но таблица пока скрыта.
+        // вызываем загрузку в фоне, чтобы когда залогинились - сразу отрисовали
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                callsArray = JSON.parse(stored);
+            } catch(e) {}
+        } else {
+            // стартовый набор
+            callsArray = [
+                {
+                    id: Date.now()+100,
+                    phone: "+7 903 111 22 33",
+                    fullName: "Владимир Системов",
+                    status: "Администрация района",
+                    prefix: "Администрация",
+                    region: "Московская область",
+                    city: "Химки",
+                    callbackDays: 2,
+                    description: "Вопрос по благоустройству парка"
+                },
+                {
+                    id: Date.now()+101,
+                    phone: "+7 812 333 44 55",
+                    fullName: "Дмитрий Губернаторов",
+                    status: "Госслужба",
+                    prefix: "Правительство области",
+                    region: "Ленинградская область",
+                    city: "Всеволожск",
+                    callbackDays: 1,
+                    description: "Отчет о дорожной инфраструктуре"
+                }
+            ];
+            saveToLocalStorage();
+        }
+        // Предзагрузка в переменную, но отрисовка только после логина
+        // При логине loadFromLocalStorage перезапишет и отрисует.
+        // Дополнительно сделаем, чтобы перед логином не было утечки.
+        const tempCalls = localStorage.getItem(STORAGE_KEY);
+        if(tempCalls) callsArray = JSON.parse(tempCalls);
+        else callsArray = [];
+    });
+    // фикс: чтобы при входе корректно отображалась загруженная БД
+    // переопределим loadFromLocalStorage при входе, он и рендерит. Все ок
+    // дополнительно в loadFromLocalStorage вызываем renderTableAndStats
+    // Перепишем loadFromLocalStorage немного, чтобы она вызывала рендер
+    const originalLoad = loadFromLocalStorage;
+    window.loadFromLocalStorage = function() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            callsArray = JSON.parse(stored);
+        } else {
+            callsArray = [];
+        }
+        renderTableAndStats();
+    };
+    loadFromLocalStorage = window.loadFromLocalStorage;
+    // замена, но сохраним старую логику с демо
+    // переопределим окончательно
+    window.loadFromLocalStorage = function() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            callsArray = JSON.parse(stored);
+        } else {
+            callsArray = [
+                { id: Date.now()+500, phone: "+7 800 555 35 35", fullName: "Президент Тестов", status: "Администрация области", prefix: "Президент", region: "Московская область", city: "Кремль", callbackDays: 0, description: "Экстренное совещание" }
+            ];
+            saveToLocalStorage();
+        }
+        renderTableAndStats();
+    };
+    // и подменим
+    loadFromLocalStorage();
+    // но чтобы при логине было корректно, вызываем тот же метод
+    const superLogin = handleLogin;
+    window.handleLogin = function() {
+        const pwd = passwordInput.value;
+        if(pwd === "1234") {
+            authPanel.classList.add("hidden");
+            dashboard.classList.remove("hidden");
+            loadFromLocalStorage();
+        } else { alert("Неверный пароль!"); passwordInput.value = ""; }
+    };
+    handleLogin = window.handleLogin;
+    loginBtn.onclick = handleLogin;
+    // обновим ссылки
+    window.addNewCall = addNewCall;
+    window.deleteCallById = deleteCallById;
+    window.renderTableAndStats = renderTableAndStats;
+    // вешаем финальные слушатели
+    document.querySelectorAll('#addRecordBtn, #applyFilterBtn, #resetFilterBtn, #clearAllBtn').forEach(btn => {
+        if(btn.id === 'addRecordBtn') btn.onclick = addNewCall;
+        if(btn.id === 'applyFilterBtn') btn.onclick = applyFilters;
+        if(btn.id === 'resetFilterBtn') btn.onclick = resetFilters;
+        if(btn.id === 'clearAllBtn') btn.onclick = clearAllRecords;
+    });
+    logoutBtn.onclick = handleLogout;
+    // если вдруг загружено неправильно, переинициализируем
+    if(dashboard.classList.contains('hidden') === false) {
+        loadFromLocalStorage();
+    }
+</script>
 </body>
-              </html>
+    </html>
