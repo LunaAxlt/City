@@ -2,17 +2,16 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Admins President - Система управления звонками</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Admins President - Обработка звонков</title>
     <style>
         * {
             box-sizing: border-box;
-            user-select: none;
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
         }
 
         body {
-            background: linear-gradient(145deg, #0a2f3a 0%, #06313a 100%);
-            font-family: 'Segoe UI', 'Roboto', 'Poppins', system-ui, sans-serif;
+            background: linear-gradient(145deg, #0a2f2a 0%, #022b2f 100%);
             margin: 0;
             min-height: 100vh;
             padding: 20px;
@@ -21,25 +20,23 @@
             align-items: center;
         }
 
-        /* Основной контейнер игры */
-        .game-container {
-            max-width: 1400px;
+        /* главный контейнер */
+        .game-wrapper {
+            max-width: 1500px;
             width: 100%;
-            background: rgba(255,255,240,0.1);
-            backdrop-filter: blur(2px);
+            background: rgba(0, 0, 0, 0.25);
             border-radius: 48px;
             padding: 20px;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,215,0,0.3);
+            backdrop-filter: blur(3px);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
         }
 
-        /* Панель входа / дашборд */
-        .auth-panel, .dashboard {
-            background: #fef9e8;
+        .auth-card, .dashboard {
+            background: #fff9ef;
             border-radius: 36px;
             padding: 20px 28px;
+            transition: 0.2s;
             box-shadow: 0 12px 28px rgba(0,0,0,0.3);
-            transition: all 0.2s;
         }
 
         .hidden {
@@ -47,71 +44,62 @@
         }
 
         h1 {
-            margin: 0 0 8px 0;
-            font-size: 2.4rem;
-            background: linear-gradient(135deg, #d4af37, #b8860b);
+            margin: 0;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #e4b363, #b57c1c);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
             letter-spacing: 1px;
         }
 
         .sub {
-            color: #2c5a6e;
-            font-weight: 500;
-            border-left: 4px solid #ffb347;
+            color: #2a5a4a;
+            border-left: 5px solid #f5a623;
             padding-left: 15px;
-            margin-bottom: 25px;
+            margin: 10px 0 20px 0;
+            font-weight: 600;
         }
 
-        .login-box {
-            background: #fff6e5;
-            border-radius: 32px;
-            padding: 24px;
-            max-width: 450px;
+        .login-area {
+            max-width: 420px;
             margin: 20px auto;
             text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            background: #fff2e0;
+            border-radius: 40px;
+            padding: 25px;
         }
 
-        .login-box input {
+        .login-area input {
             width: 90%;
-            padding: 14px 18px;
+            padding: 14px;
             font-size: 1.2rem;
-            border: 2px solid #e0cba0;
             border-radius: 60px;
-            background: white;
+            border: 2px solid #ddb582;
             text-align: center;
             margin: 12px 0;
             font-weight: bold;
         }
 
         button {
-            background: #2c5a6e;
+            background: #1f5e55;
             border: none;
             color: white;
             font-weight: bold;
-            padding: 12px 28px;
+            padding: 10px 25px;
             border-radius: 40px;
-            font-size: 1.1rem;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
             margin: 5px;
         }
 
-        button:hover {
-            background: #1f4456;
-            transform: scale(0.97);
-        }
-
         .gold-btn {
-            background: #d4af37;
-            color: #1e2f3a;
+            background: #d4a13e;
+            color: #1e2f2a;
         }
 
-        .grid-forms {
+        .flex-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 24px;
@@ -124,576 +112,449 @@
             padding: 18px 22px;
             flex: 1;
             min-width: 280px;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
         }
 
         .card h3 {
-            border-bottom: 3px solid #ffb347;
+            border-bottom: 3px solid #f3b33d;
             display: inline-block;
-            margin-top: 0;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 10px 12px;
+            padding: 10px;
             margin: 8px 0;
-            border-radius: 28px;
-            border: 1px solid #ccc;
-            font-family: inherit;
-        }
-
-        textarea {
-            border-radius: 20px;
-            resize: vertical;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            margin-top: 20px;
-            border-radius: 24px;
-            background: #fff1e0;
-            padding: 6px;
+            border-radius: 30px;
+            border: 1px solid #c0b28a;
+            background: #fefcf7;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: #fffaf2;
-            border-radius: 20px;
+            background: #fff9ef;
+            border-radius: 24px;
+            overflow: hidden;
         }
 
         th, td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #eeddbb;
+            padding: 12px 6px;
+            border-bottom: 1px solid #f0e2cc;
             text-align: left;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         th {
-            background: #d9c48b;
-            color: #1e2f2f;
+            background: #b98942;
+            color: white;
         }
 
-        .badge {
-            background: #2a7f6e;
-            color: white;
-            border-radius: 30px;
+        .badge-status {
+            display: inline-block;
             padding: 4px 12px;
+            border-radius: 30px;
             font-size: 0.7rem;
             font-weight: bold;
-            display: inline-block;
         }
 
-        .footer-actions {
+        .incoming-call {
+            background: #fff0d6;
+            border-left: 6px solid #ff914d;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 28px;
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
-            margin-top: 20px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
-        @media (max-width: 780px) {
-            .game-container { padding: 10px; }
+        .btn-small {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            background: #2c6e5f;
+        }
+
+        hr {
+            margin: 15px 0;
+        }
+
+        @media (max-width: 800px) {
             th, td { font-size: 0.7rem; }
+            .incoming-call { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
     </style>
 </head>
 <body>
-<div class="game-container" id="gameRoot">
+<div class="game-wrapper">
     <!-- Панель авторизации -->
-    <div id="authPanel" class="auth-panel">
-        <div style="text-align: center;">
-            <h1>🏛️ ADMINS PRESIDENT 🏛️</h1>
-            <div class="sub">Вход в правительственную сеть связи</div>
+    <div id="authPanel" class="auth-card">
+        <div style="text-align:center;">
+            <h1>📞 ADMINS PRESIDENT</h1>
+            <div class="sub">Система обработки президентских звонков</div>
         </div>
-        <div class="login-box">
-            <span style="font-size: 2rem;">📞</span>
-            <p style="color: #3a6b47; font-weight: bold;">Введите пароль для доступа</p>
-            <input type="password" id="passwordInput" placeholder="Пароль" autocomplete="off">
-            <button id="loginBtn">Войти в систему 🔑</button>
-            <div style="margin-top: 12px; font-size: 0.8rem; color: #b45f1b;">* демо-пароль: 1234</div>
+        <div class="login-area">
+            <span style="font-size:2rem;">🔐</span>
+            <p>Введите пароль для входа в сеть</p>
+            <input type="password" id="passInput" placeholder="Пароль">
+            <button id="enterBtn">Войти</button>
+            <div style="margin-top: 12px; font-size:0.8rem;">* пароль: 1234</div>
         </div>
     </div>
 
-    <!-- Главная панель управления (после входа) -->
+    <!-- Панель управления (после логина) -->
     <div id="dashboard" class="dashboard hidden">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div>
-                <h1>📋 ADMINS PRESIDENT</h1>
-                <div class="sub">Панель управления звонками • Президентский указ</div>
-            </div>
-            <button id="logoutBtn" style="background:#a03e2c;">🚪 Выйти</button>
+            <div><h1>🏛️ ADMINS PRESIDENT</h1><div class="sub">Президентская канцелярия • обработка входящих</div></div>
+            <button id="logoutBtn" style="background:#9e4a2e;">Выйти</button>
         </div>
 
-        <div class="grid-forms">
-            <!-- Левая форма: Добавление нового звонка / контакта -->
+        <div class="flex-grid">
+            <!-- Левая панель: ручное добавление звонка / контакта -->
             <div class="card">
-                <h3>✍️ Новое обращение / звонок</h3>
-                <label>📞 Номер телефона (левый / любой)</label>
-                <input type="text" id="phoneNumber" placeholder="+7 999 123-45-67" value="+7 900 111-22-33">
-
-                <label>👤 ФИО (Гражданин / Сотрудник)</label>
-                <input type="text" id="fullName" placeholder="Иванов Иван Иванович">
-
-                <label>🏷️ Статус / Категория</label>
-                <select id="statusSelect">
-                    <option value="Гражданин">Гражданин</option>
-                    <option value="Госслужба">Госслужба</option>
-                    <option value="Администрация района">Администрация района</option>
-                    <option value="Администрация области">Администрация области</option>
+                <h3>✍️ Добавить обращение вручную</h3>
+                <label>📞 Номер (можно буквами / левый)</label>
+                <input type="text" id="manualPhone" placeholder="+7 999 123-45-67 или ГОРЯЧАЯ ЛИНИЯ" value="ADMIN-001">
+                <label>👤 ФИО / Организация</label>
+                <input type="text" id="manualName" placeholder="Иванов И.И.">
+                <label>🏷️ Статус гражданина</label>
+                <select id="manualStatus">
+                    <option>Гражданин</option>
+                    <option>Госслужба</option>
+                    <option>Администрация района</option>
+                    <option>Администрация области</option>
                 </select>
-
-                <label>⭐ Префикс важности (приоритет)</label>
-                <select id="prefixSelect">
+                <label>⭐ Префикс важности</label>
+                <select id="manualPrefix">
                     <option value="Президент">👑 Президент</option>
-                    <option value="Правительство области">🏛️ Правительство области</option>
+                    <option value="Администрация Президента">🏛️ Администрация Президента</option>
                     <option value="Администрация">📌 Администрация</option>
                     <option value="Фейк">⚠️ Фейк</option>
                     <option value="Не особо важно">📉 Не особо важно</option>
                 </select>
-
-                <label>🗺️ Выбор области</label>
-                <select id="regionSelect">
-                    <option value="Московская область">Московская область</option>
-                    <option value="Ленинградская область">Ленинградская область</option>
-                    <option value="Краснодарский край">Краснодарский край</option>
-                    <option value="Свердловская область">Свердловская область</option>
-                    <option value="Татарстан">Республика Татарстан</option>
-                    <option value="Новосибирская область">Новосибирская область</option>
+                <label>🗺️ Область (расширенный список)</label>
+                <select id="manualRegion">
+                    <option>Московская область</option><option>Ленинградская область</option><option>Краснодарский край</option>
+                    <option>Свердловская область</option><option>Республика Татарстан</option><option>Новосибирская область</option>
+                    <option>Ростовская область</option><option>Красноярский край</option><option>Приморский край</option>
+                    <option>Нижегородская область</option><option>Самарская область</option><option>Челябинская область</option>
                 </select>
-
                 <label>🏘️ Населенный пункт</label>
-                <input type="text" id="cityTown" placeholder="город / село" value="Центральный">
-
-                <label>⏰ Время перезвона (дни, 0-3)</label>
-                <input type="number" id="callbackDays" min="0" max="3" step="1" value="1">
-
-                <label>📝 Описание звонка / суть обращения</label>
-                <textarea id="description" rows="2" placeholder="Жалоба, предложение, доклад..."></textarea>
-
-                <button id="addRecordBtn" class="gold-btn">➕ Добавить в реестр</button>
+                <input type="text" id="manualCity" placeholder="город/село" value="Центральный">
+                <label>⏰ Время перезвона (0-3 дня)</label>
+                <input type="number" id="manualCallback" min="0" max="3" value="1">
+                <label>📝 Описание</label>
+                <textarea id="manualDesc" rows="2" placeholder="Суть обращения..."></textarea>
+                <button id="addManualBtn" class="gold-btn">➕ Добавить в реестр</button>
             </div>
 
-            <!-- Правая карточка: фильтры и статистика -->
+            <!-- Правая панель: входящие звонки (системные) + обработка -->
             <div class="card">
-                <h3>🔍 Фильтрация & Статистика</h3>
-                <label>Фильтр по префиксу</label>
-                <select id="filterPrefix">
-                    <option value="all">Все префиксы</option>
-                    <option value="Президент">Президент</option>
-                    <option value="Правительство области">Правительство области</option>
-                    <option value="Администрация">Администрация</option>
-                    <option value="Фейк">Фейк</option>
-                    <option value="Не особо важно">Не особо важно</option>
-                </select>
-                <label>Фильтр по области</label>
-                <select id="filterRegion">
-                    <option value="all">Все области</option>
-                    <option value="Московская область">Московская область</option>
-                    <option value="Ленинградская область">Ленинградская область</option>
-                    <option value="Краснодарский край">Краснодарский край</option>
-                    <option value="Свердловская область">Свердловская область</option>
-                    <option value="Татарстан">Татарстан</option>
-                    <option value="Новосибирская область">Новосибирская область</option>
-                </select>
-                <button id="applyFilterBtn">Применить фильтр</button>
-                <button id="resetFilterBtn">Сбросить</button>
-                <div style="margin-top: 15px; background:#e7dbbc; border-radius: 28px; padding: 12px;">
-                    <div>📊 Всего записей: <strong id="totalCount">0</strong></div>
-                    <div>⭐ Президентских: <strong id="presidentCount">0</strong></div>
-                    <div>🏛️ Правительство области: <strong id="govRegionCount">0</strong></div>
+                <h3>📞 ВХОДЯЩИЕ ЗВОНКИ (авто)</h3>
+                <div id="incomingCallsList" style="max-height: 280px; overflow-y: auto; margin-bottom: 15px;">
+                    <!-- динамические звонки -->
                 </div>
-                <button id="clearAllBtn" style="background:#8b5a2b; margin-top:12px;">⚠️ Очистить все записи</button>
+                <button id="generateCallBtn" style="background:#ca6f2e;">🔔 Сгенерировать случайный звонок</button>
+                <hr>
+                <h3>⚙️ Обработка звонков</h3>
+                <p style="font-size: 0.8rem;">Выберите звонок из таблицы ниже, нажмите «Обработать»</p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <select id="selectCallForProcess">
+                        <option value="">-- выберите ID звонка --</option>
+                    </select>
+                    <select id="processStatusSelect">
+                        <option value="В обработке">⏳ В обработке</option>
+                        <option value="Обработан">✅ Обработан</option>
+                        <option value="Передано">📤 Передано</option>
+                        <option value="Решено">🏁 Решено</option>
+                        <option value="Особо Важно ‼️">🔥 Особо Важно ‼️</option>
+                    </select>
+                    <button id="applyProcessBtn">Применить статус</button>
+                </div>
             </div>
         </div>
 
-        <!-- Таблица всех звонков -->
-        <div class="table-wrapper">
-            <h3>📋 Журнал звонков / Обращений (Президентский реестр)</h3>
-            <table id="callsTable">
-                <thead>
-                    <tr><th>Телефон</th><th>ФИО</th><th>Статус</th><th>Префикс</th><th>Область</th><th>Нас. пункт</th><th>Перезвон (дни)</th><th>Описание</th><th>Действие</th></tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="9" style="text-align:center;">Нет данных. Добавьте первый звонок.</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="footer-actions">
-            <small>🔹 Система Admins President — реальные полномочия | Время перезвона 0-3 дня</small>
+        <!-- Таблица всех звонков (реестр) -->
+        <div style="margin-top: 20px; background: #fff2e2; border-radius: 28px; padding: 12px;">
+            <h3>📋 Полный реестр обращений (все звонки)</h3>
+            <div style="overflow-x: auto;">
+                <table id="masterTable">
+                    <thead>
+                        <tr><th>ID</th><th>Телефон</th><th>ФИО</th><th>Статус лица</th><th>Префикс</th><th>Область</th><th>Нас.пункт</th><th>Перезвон(дни)</th><th>Описание</th><th>Статус обработки</th><th>Действие</th></tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="11">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                <button id="clearAllBtn" style="background:#9c5a2b;">⚠️ Очистить все записи</button>
+                <span id="statsInfo">📊 Всего: 0 | Президент: 0 | Адм.Президента: 0</span>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- Хранилище данных (ключ localStorage) ---
-    const STORAGE_KEY = 'admins_president_calls';
+    // --- Хранилище и модель ---
+    const STORAGE_KEY = 'admins_president_full_calls';
+    let callsDB = [];    // массив объектов звонков
 
-    // Глобальный массив звонков
-    let callsArray = [];
-
-    // DOM элементы
-    const authPanel = document.getElementById('authPanel');
-    const dashboard = document.getElementById('dashboard');
-    const loginBtn = document.getElementById('loginBtn');
-    const passwordInput = document.getElementById('passwordInput');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const addRecordBtn = document.getElementById('addRecordBtn');
-    const tableBody = document.getElementById('tableBody');
-    const applyFilterBtn = document.getElementById('applyFilterBtn');
-    const resetFilterBtn = document.getElementById('resetFilterBtn');
-    const filterPrefixSelect = document.getElementById('filterPrefix');
-    const filterRegionSelect = document.getElementById('filterRegion');
-    const totalCountSpan = document.getElementById('totalCount');
-    const presidentCountSpan = document.getElementById('presidentCount');
-    const govRegionCountSpan = document.getElementById('govRegionCount');
-    const clearAllBtn = document.getElementById('clearAllBtn');
-
-    // Поля ввода
-    const phoneInput = document.getElementById('phoneNumber');
-    const fullNameInput = document.getElementById('fullName');
-    const statusSelect = document.getElementById('statusSelect');
-    const prefixSelect = document.getElementById('prefixSelect');
-    const regionSelect = document.getElementById('regionSelect');
-    const cityInput = document.getElementById('cityTown');
-    const callbackDaysInput = document.getElementById('callbackDays');
-    const descInput = document.getElementById('description');
-
-    // ---- вспомогательные функции ----
-    function saveToLocalStorage() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(callsArray));
+    // статусы обработки по умолчанию "Новый"
+    function createCall(phone, fullName, statusType, prefix, region, city, callbackDays, description, processStatus = "Новый") {
+        return {
+            id: Date.now() + Math.floor(Math.random() * 10000),
+            phone: phone,
+            fullName: fullName,
+            statusType: statusType,      // гражданин/госслужба/адм.района/области
+            prefix: prefix,
+            region: region,
+            city: city,
+            callbackDays: callbackDays,
+            description: description,
+            processStatus: processStatus
+        };
     }
 
-    function loadFromLocalStorage() {
+    function saveToLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(callsDB));
+    }
+
+    function loadFromLocal() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-            try {
-                callsArray = JSON.parse(stored);
-            } catch(e) { callsArray = []; }
+            callsDB = JSON.parse(stored);
         } else {
-            // демо-записи для примера
-            callsArray = [
-                {
-                    id: Date.now()+1,
-                    phone: "+7 916 555 12 34",
-                    fullName: "Алексей Дроздов",
-                    status: "Госслужба",
-                    prefix: "Правительство области",
-                    region: "Московская область",
-                    city: "Одинцово",
-                    callbackDays: 1,
-                    description: "Запрос на выделение финансирования района"
-                },
-                {
-                    id: Date.now()+2,
-                    phone: "+7 921 777 88 99",
-                    fullName: "Елена Президентская",
-                    status: "Администрация области",
-                    prefix: "Президент",
-                    region: "Ленинградская область",
-                    city: "Гатчина",
-                    callbackDays: 0,
-                    description: "Срочный доклад по обороне"
-                },
-                {
-                    id: Date.now()+3,
-                    phone: "+7 495 000 11 22",
-                    fullName: "Фейк Фейкович",
-                    status: "Гражданин",
-                    prefix: "Фейк",
-                    region: "Краснодарский край",
-                    city: "Сочи",
-                    callbackDays: 2,
-                    description: "Ложное сообщение о ЧП"
-                }
+            // стартовые демо-звонки с разными статусами
+            callsDB = [
+                createCall("+7 916 777 88 99", "Алексей Громов", "Госслужба", "Президент", "Московская область", "Одинцово", 1, "Срочный доклад по безопасности", "В обработке"),
+                createCall("ГОРЯЧАЯ ЛИНИЯ 01", "Мария Сокол", "Гражданин", "Администрация Президента", "Ленинградская область", "Гатчина", 0, "Жалоба на ЖКХ", "Новый"),
+                createCall("ABC-112", "Фейков Фейк", "Гражданин", "Фейк", "Краснодарский край", "Сочи", 2, "Ложное минирование", "Передано"),
+                createCall("+7 495 555 12 34", "Дмитрий Орлов", "Администрация области", "Администрация", "Свердловская область", "Екатеринбург", 1, "Вопрос по дорогам", "Решено"),
             ];
-            saveToLocalStorage();
+            saveToLocal();
         }
-        renderTableAndStats();
+        renderAllTablesAndStats();
+        updateProcessDropdown();
     }
 
-    // Рендер таблицы с учетом активных фильтров
-    let currentFilterPrefix = "all";
-    let currentFilterRegion = "all";
-
-    function getFilteredCalls() {
-        return callsArray.filter(call => {
-            let prefixMatch = (currentFilterPrefix === "all" || call.prefix === currentFilterPrefix);
-            let regionMatch = (currentFilterRegion === "all" || call.region === currentFilterRegion);
-            return prefixMatch && regionMatch;
-        });
-    }
-
-    function updateStats() {
-        const total = callsArray.length;
-        const presidentCount = callsArray.filter(c => c.prefix === "Президент").length;
-        const govRegionCount = callsArray.filter(c => c.prefix === "Правительство области").length;
-        totalCountSpan.innerText = total;
-        presidentCountSpan.innerText = presidentCount;
-        govRegionCountSpan.innerText = govRegionCount;
-    }
-
-    function renderTableAndStats() {
-        const filtered = getFilteredCalls();
-        updateStats();
-        if (filtered.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">📭 Нет записей по заданным фильтрам</td></tr>';
+    // отрисовка главной таблицы
+    function renderMasterTable() {
+        const tbody = document.getElementById('tableBody');
+        if (!callsDB.length) {
+            tbody.innerHTML = '<tr><td colspan="11">Нет записей. Добавьте вручную или сгенерируйте входящий звонок.</td></tr>';
             return;
         }
         let html = '';
-        filtered.forEach(call => {
+        callsDB.forEach(call => {
+            let statusColor = '';
+            if (call.processStatus === 'Особо Важно ‼️') statusColor = 'background:#ff784b; color:white;';
+            else if (call.processStatus === 'Решено') statusColor = 'background:#42855e;';
+            else if (call.processStatus === 'Обработан') statusColor = 'background:#568c6b;';
+            else if (call.processStatus === 'Передано') statusColor = 'background:#e9b35f;';
+            else if (call.processStatus === 'В обработке') statusColor = 'background:#f0a55a;';
+            
             html += `<tr>
+                        <td>${call.id}</td>
                         <td>${escapeHtml(call.phone)}</td>
                         <td>${escapeHtml(call.fullName)}</td>
-                        <td><span class="badge" style="background:#4f6d5e;">${escapeHtml(call.status)}</span></td>
+                        <td>${escapeHtml(call.statusType)}</td>
                         <td><strong style="color:${getPrefixColor(call.prefix)}">${escapeHtml(call.prefix)}</strong></td>
                         <td>${escapeHtml(call.region)}</td>
                         <td>${escapeHtml(call.city)}</td>
                         <td>${call.callbackDays} дн.</td>
-                        <td style="max-width:200px; overflow-wrap:break-word;">${escapeHtml(call.description || '—')}</td>
-                        <td><button class="delete-btn" data-id="${call.id}" style="background:#c06c3e; padding:6px 12px;">🗑️ Удалить</button></td>
+                        <td style="max-width:180px;">${escapeHtml(call.description)}</td>
+                        <td><span class="badge-status" style="${statusColor} padding:4px 10px;">${escapeHtml(call.processStatus)}</span></td>
+                        <td><button class="delete-call-btn" data-id="${call.id}" style="background:#bd6b42;">🗑️ Удалить</button></td>
                     </tr>`;
         });
-        tableBody.innerHTML = html;
-        // добавить обработчики на кнопки удаления
-        document.querySelectorAll('.delete-btn').forEach(btn => {
+        tbody.innerHTML = html;
+        document.querySelectorAll('.delete-call-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = parseInt(btn.getAttribute('data-id'));
                 deleteCallById(id);
             });
         });
+        // статистика
+        const total = callsDB.length;
+        const presidentCount = callsDB.filter(c => c.prefix === 'Президент').length;
+        const admPresidentCount = callsDB.filter(c => c.prefix === 'Администрация Президента').length;
+        document.getElementById('statsInfo').innerHTML = `📊 Всего: ${total} | 👑 Президент: ${presidentCount} | 🏛️ Адм.Президента: ${admPresidentCount}`;
     }
 
     function getPrefixColor(prefix) {
-        switch(prefix) {
-            case 'Президент': return '#b22234';
-            case 'Правительство области': return '#2a7f6e';
-            case 'Администрация': return '#3a6ea5';
-            case 'Фейк': return '#8b5a2b';
-            default: return '#4e6e5e';
-        }
+        if(prefix === 'Президент') return '#c73b1e';
+        if(prefix === 'Администрация Президента') return '#d4a11e';
+        if(prefix === 'Администрация') return '#2c6e5c';
+        if(prefix === 'Фейк') return '#98623c';
+        return '#4f6b5e';
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
-        });
-    }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
     function deleteCallById(id) {
-        callsArray = callsArray.filter(call => call.id !== id);
-        saveToLocalStorage();
-        renderTableAndStats();
+        callsDB = callsDB.filter(c => c.id !== id);
+        saveToLocal();
+        renderAllTablesAndStats();
+        updateProcessDropdown();
     }
 
-    function addNewCall() {
-        // Валидация основных полей (номер телефона и ФИО хоть какие-то)
-        let phone = phoneInput.value.trim();
-        let fullName = fullNameInput.value.trim();
-        if (phone === "") {
-            alert("Введите номер телефона (можно левый)");
-            return;
-        }
-        if (fullName === "") {
-            alert("Укажите ФИО");
-            return;
-        }
-        let callbackDays = parseInt(callbackDaysInput.value);
-        if (isNaN(callbackDays)) callbackDays = 0;
-        if (callbackDays < 0) callbackDays = 0;
-        if (callbackDays > 3) callbackDays = 3;
-        
-        const newCall = {
-            id: Date.now(),
-            phone: phone,
-            fullName: fullName,
-            status: statusSelect.value,
-            prefix: prefixSelect.value,
-            region: regionSelect.value,
-            city: cityInput.value.trim() || "Не указан",
-            callbackDays: callbackDays,
-            description: descInput.value.trim() || "Нет описания"
-        };
-        callsArray.unshift(newCall); // новые сверху
-        saveToLocalStorage();
-        // Очистка некоторых полей для удобства, но можно оставить шаблон
-        phoneInput.value = "";
-        fullNameInput.value = "";
-        descInput.value = "";
-        cityInput.value = "Центральный";
-        callbackDaysInput.value = 1;
-        // статусы и прочее оставляем, но сброс телефона для удобства
-        renderTableAndStats();
-    }
-
-    function clearAllRecords() {
-        if (confirm("⚠️ ВНИМАНИЕ! Вы уверены, что хотите удалить ВСЕ записи о звонках? Это действие необратимо.")) {
-            callsArray = [];
-            saveToLocalStorage();
-            renderTableAndStats();
-        }
-    }
-
-    // Фильтры
-    function applyFilters() {
-        currentFilterPrefix = filterPrefixSelect.value;
-        currentFilterRegion = filterRegionSelect.value;
-        renderTableAndStats();
-    }
-    function resetFilters() {
-        filterPrefixSelect.value = "all";
-        filterRegionSelect.value = "all";
-        currentFilterPrefix = "all";
-        currentFilterRegion = "all";
-        renderTableAndStats();
-    }
-
-    // Сессия входа с паролем 1234
-    function handleLogin() {
-        const pwd = passwordInput.value;
-        if (pwd === "1234") {
-            authPanel.classList.add("hidden");
-            dashboard.classList.remove("hidden");
-            // загрузить данные при успешном входе
-            loadFromLocalStorage();
-        } else {
-            alert("Неверный пароль! Доступ только для президентской администрации. (пароль: 1234)");
-            passwordInput.value = "";
-        }
-    }
-
-    function handleLogout() {
-        dashboard.classList.add("hidden");
-        authPanel.classList.remove("hidden");
-        passwordInput.value = "";
-        // сохранять данные не требуется
-    }
-
-    // Инициализация слушателей
-    function initEventListeners() {
-        loginBtn.addEventListener('click', handleLogin);
-        logoutBtn.addEventListener('click', handleLogout);
-        addRecordBtn.addEventListener('click', addNewCall);
-        applyFilterBtn.addEventListener('click', applyFilters);
-        resetFilterBtn.addEventListener('click', resetFilters);
-        clearAllBtn.addEventListener('click', clearAllRecords);
-        // Нажатие Enter в пароле
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
+    // обновить выпадающий список для обработки звонков (ID)
+    function updateProcessDropdown() {
+        const selectEl = document.getElementById('selectCallForProcess');
+        if (!selectEl) return;
+        let options = '<option value="">-- выберите ID звонка --</option>';
+        callsDB.forEach(call => {
+            options += `<option value="${call.id}">ID ${call.id} - ${call.phone} (${call.processStatus})</option>`;
         });
+        selectEl.innerHTML = options;
     }
 
-    // дополнительная проверка при загрузке: если уже залогинены? нет, по умолчанию выходим
-    // но чтобы не хранить сессию, оставим классический вход
-    window.addEventListener('DOMContentLoaded', () => {
-        initEventListeners();
-        // изначально показываем панель входа, данные не подгружаем до входа.
-        // но можем подгрузить для демонстрации сохранённых записей? подгрузим в память, но таблица пока скрыта.
-        // вызываем загрузку в фоне, чтобы когда залогинились - сразу отрисовали
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            try {
-                callsArray = JSON.parse(stored);
-            } catch(e) {}
-        } else {
-            // стартовый набор
-            callsArray = [
-                {
-                    id: Date.now()+100,
-                    phone: "+7 903 111 22 33",
-                    fullName: "Владимир Системов",
-                    status: "Администрация района",
-                    prefix: "Администрация",
-                    region: "Московская область",
-                    city: "Химки",
-                    callbackDays: 2,
-                    description: "Вопрос по благоустройству парка"
-                },
-                {
-                    id: Date.now()+101,
-                    phone: "+7 812 333 44 55",
-                    fullName: "Дмитрий Губернаторов",
-                    status: "Госслужба",
-                    prefix: "Правительство области",
-                    region: "Ленинградская область",
-                    city: "Всеволожск",
-                    callbackDays: 1,
-                    description: "Отчет о дорожной инфраструктуре"
-                }
-            ];
-            saveToLocalStorage();
-        }
-        // Предзагрузка в переменную, но отрисовка только после логина
-        // При логине loadFromLocalStorage перезапишет и отрисует.
-        // Дополнительно сделаем, чтобы перед логином не было утечки.
-        const tempCalls = localStorage.getItem(STORAGE_KEY);
-        if(tempCalls) callsArray = JSON.parse(tempCalls);
-        else callsArray = [];
-    });
-    // фикс: чтобы при входе корректно отображалась загруженная БД
-    // переопределим loadFromLocalStorage при входе, он и рендерит. Все ок
-    // дополнительно в loadFromLocalStorage вызываем renderTableAndStats
-    // Перепишем loadFromLocalStorage немного, чтобы она вызывала рендер
-    const originalLoad = loadFromLocalStorage;
-    window.loadFromLocalStorage = function() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            callsArray = JSON.parse(stored);
-        } else {
-            callsArray = [];
-        }
-        renderTableAndStats();
-    };
-    loadFromLocalStorage = window.loadFromLocalStorage;
-    // замена, но сохраним старую логику с демо
-    // переопределим окончательно
-    window.loadFromLocalStorage = function() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            callsArray = JSON.parse(stored);
-        } else {
-            callsArray = [
-                { id: Date.now()+500, phone: "+7 800 555 35 35", fullName: "Президент Тестов", status: "Администрация области", prefix: "Президент", region: "Московская область", city: "Кремль", callbackDays: 0, description: "Экстренное совещание" }
-            ];
-            saveToLocalStorage();
-        }
-        renderTableAndStats();
-    };
-    // и подменим
-    loadFromLocalStorage();
-    // но чтобы при логине было корректно, вызываем тот же метод
-    const superLogin = handleLogin;
-    window.handleLogin = function() {
-        const pwd = passwordInput.value;
-        if(pwd === "1234") {
-            authPanel.classList.add("hidden");
-            dashboard.classList.remove("hidden");
-            loadFromLocalStorage();
-        } else { alert("Неверный пароль!"); passwordInput.value = ""; }
-    };
-    handleLogin = window.handleLogin;
-    loginBtn.onclick = handleLogin;
-    // обновим ссылки
-    window.addNewCall = addNewCall;
-    window.deleteCallById = deleteCallById;
-    window.renderTableAndStats = renderTableAndStats;
-    // вешаем финальные слушатели
-    document.querySelectorAll('#addRecordBtn, #applyFilterBtn, #resetFilterBtn, #clearAllBtn').forEach(btn => {
-        if(btn.id === 'addRecordBtn') btn.onclick = addNewCall;
-        if(btn.id === 'applyFilterBtn') btn.onclick = applyFilters;
-        if(btn.id === 'resetFilterBtn') btn.onclick = resetFilters;
-        if(btn.id === 'clearAllBtn') btn.onclick = clearAllRecords;
-    });
-    logoutBtn.onclick = handleLogout;
-    // если вдруг загружено неправильно, переинициализируем
-    if(dashboard.classList.contains('hidden') === false) {
-        loadFromLocalStorage();
+    // применить новый статус обработки
+    function applyProcessStatus() {
+        const callId = parseInt(document.getElementById('selectCallForProcess').value);
+        const newStatus = document.getElementById('processStatusSelect').value;
+        if (isNaN(callId)) { alert("Выберите звонок из списка!"); return; }
+        const callIndex = callsDB.findIndex(c => c.id === callId);
+        if (callIndex === -1) { alert("Звонок не найден"); return; }
+        callsDB[callIndex].processStatus = newStatus;
+        saveToLocal();
+        renderAllTablesAndStats();
+        updateProcessDropdown();
+        alert(`Звонок ID ${callId} теперь статус: ${newStatus}`);
     }
+
+    // добавление ручного звонка
+    function addManualCall() {
+        let phone = document.getElementById('manualPhone').value.trim();
+        let fullName = document.getElementById('manualName').value.trim();
+        if (!phone) { alert("Введите номер (можно буквами)"); return; }
+        if (!fullName) fullName = "Аноним";
+        let statusType = document.getElementById('manualStatus').value;
+        let prefix = document.getElementById('manualPrefix').value;
+        let region = document.getElementById('manualRegion').value;
+        let city = document.getElementById('manualCity').value.trim() || "Не указан";
+        let callback = parseInt(document.getElementById('manualCallback').value);
+        if (isNaN(callback)) callback = 0;
+        callback = Math.min(3, Math.max(0, callback));
+        let desc = document.getElementById('manualDesc').value.trim() || "Обращение";
+        const newCall = createCall(phone, fullName, statusType, prefix, region, city, callback, desc, "Новый");
+        callsDB.unshift(newCall);
+        saveToLocal();
+        renderAllTablesAndStats();
+        updateProcessDropdown();
+        // очистить форму частично
+        document.getElementById('manualPhone').value = "";
+        document.getElementById('manualName').value = "";
+        document.getElementById('manualDesc').value = "";
+        document.getElementById('manualCity').value = "Центральный";
+        document.getElementById('manualCallback').value = 1;
+    }
+
+    // Генерация случайного входящего звонка (автоматически появляется в таблице)
+    function generateRandomIncoming() {
+        const phonesList = ["+7 999 111 2233", "ГОРЯЧАЯ ЛИНИЯ 02", "АДМИН-112", "8 800 555 3535", "СПЕЦСВЯЗЬ", "+7 343 777 8899"];
+        const namesList = ["Владимир К.", "Анна Сидорова", "Гражданин РФ", "Мэр Зареченск", "Депутат Облдумы", "Начальник УВД"];
+        const statuses = ["Гражданин", "Госслужба", "Администрация района", "Администрация области"];
+        const prefixes = ["Президент", "Администрация Президента", "Администрация", "Фейк", "Не особо важно"];
+        const regionsAll = ["Московская область","Ленинградская область","Краснодарский край","Свердловская область","Республика Татарстан","Новосибирская область","Ростовская область","Красноярский край","Приморский край"];
+        const citiesList = ["Центральный","Северный","Южный","Пригород","Кремль","Спутник"];
+        const randomPhone = phonesList[Math.floor(Math.random() * phonesList.length)];
+        const randomName = namesList[Math.floor(Math.random() * namesList.length)];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        const randomRegion = regionsAll[Math.floor(Math.random() * regionsAll.length)];
+        const randomCity = citiesList[Math.floor(Math.random() * citiesList.length)];
+        const randomDays = Math.floor(Math.random() * 4);
+        const descOptions = ["Срочный вопрос", "Жалоба на ЖКХ", "Предложение", "Коррупция", "Чрезвычайное происшествие", "Запрос документов"];
+        const randomDesc = descOptions[Math.floor(Math.random() * descOptions.length)];
+        
+        const newCall = createCall(randomPhone, randomName, randomStatus, randomPrefix, randomRegion, randomCity, randomDays, randomDesc, "Новый");
+        callsDB.unshift(newCall);
+        saveToLocal();
+        renderAllTablesAndStats();
+        updateProcessDropdown();
+        // Показать уведомление во входящих (визуально)
+        const incomingDiv = document.getElementById('incomingCallsList');
+        const notif = document.createElement('div');
+        notif.className = 'incoming-call';
+        notif.innerHTML = `<span><strong>📞 Входящий!</strong> ${randomPhone} | ${randomName} [${randomPrefix}]</span><span style="font-size:0.7rem;">${randomDesc}</span>`;
+        incomingDiv.prepend(notif);
+        setTimeout(() => { if(notif) notif.remove(); }, 4000);
+    }
+
+    function renderIncomingPreview() {
+        const container = document.getElementById('incomingCallsList');
+        if (!container) return;
+        const lastCalls = [...callsDB].slice(0, 5);
+        if(lastCalls.length === 0) { container.innerHTML = '<div>Нет звонков. Сгенерируйте входящий.</div>'; return; }
+        container.innerHTML = lastCalls.map(call => `
+            <div class="incoming-call">
+                <div><strong>📞 ${escapeHtml(call.phone)}</strong> — ${escapeHtml(call.fullName)}<br><span style="font-size:0.7rem;">${escapeHtml(call.prefix)} | ${escapeHtml(call.region)}</span></div>
+                <div><span class="badge-status" style="background:#d9b48b;">${escapeHtml(call.processStatus)}</span></div>
+            </div>
+        `).join('');
+    }
+
+    function renderAllTablesAndStats() {
+        renderMasterTable();
+        renderIncomingPreview();
+        updateProcessDropdown();
+    }
+
+    function clearAllCalls() {
+        if(confirm("Удалить абсолютно все звонки из реестра? Это действие необратимо.")) {
+            callsDB = [];
+            saveToLocal();
+            renderAllTablesAndStats();
+            updateProcessDropdown();
+        }
+    }
+
+    // --- АВТОРИЗАЦИЯ (пароль 1234)---
+    function loginSystem() {
+        const pwd = document.getElementById('passInput').value;
+        if(pwd === "1234") {
+            document.getElementById('authPanel').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            loadFromLocal();   // загружаем все данные
+        } else {
+            alert("Неверный пароль! Только для президентской администрации. Пароль: 1234");
+            document.getElementById('passInput').value = "";
+        }
+    }
+    function logoutSystem() {
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('authPanel').classList.remove('hidden');
+        document.getElementById('passInput').value = "";
+    }
+
+    // Инициализация событий
+    function bindEvents() {
+        document.getElementById('enterBtn').addEventListener('click', loginSystem);
+        document.getElementById('logoutBtn').addEventListener('click', logoutSystem);
+        document.getElementById('addManualBtn').addEventListener('click', addManualCall);
+        document.getElementById('generateCallBtn').addEventListener('click', generateRandomIncoming);
+        document.getElementById('applyProcessBtn').addEventListener('click', applyProcessStatus);
+        document.getElementById('clearAllBtn').addEventListener('click', clearAllCalls);
+        document.getElementById('passInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') loginSystem(); });
+    }
+
+    bindEvents();
+    // предзагрузка без отображения дашборда, но данные инициализируем в памяти
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    if(storedData) callsDB = JSON.parse(storedData);
+    else {
+        callsDB = [
+            createCall("+7 903 111 22 33", "Елена Президентская", "Администрация области", "Президент", "Московская область", "Красногорск", 0, "Срочный вызов", "Особо Важно ‼️"),
+            createCall("ЛЕВЫЙ НОМЕР", "Тест Тестов", "Гражданин", "Администрация Президента", "Ленинградская область", "Выборг", 2, "Тестовое обращение", "В обработке"),
+        ];
+        saveToLocal();
+    }
+    // не рендерим до входа, но после входа loadFromLocal отработает
+    window.preloadCalls = callsDB;
+    // если вдруг уже залогинен (не бывает), но на всякий случай после логина перерендер
+    console.log("Система готова. Пароль 1234");
 </script>
 </body>
-    </html>
+</html>
