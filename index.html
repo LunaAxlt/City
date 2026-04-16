@@ -1,564 +1,454 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пожарная безопасность ТЦ · Видеонаблюдение</title>
-    <!-- Font Awesome для иконок -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0b0e14;
-            color: #eef2fb;
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .dashboard {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* Заголовок */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-
-        .header h1 {
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header h1 i {
-            color: #f97316;
-        }
-
-        .status-badge {
-            background: #1e2430;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-left: 4px solid #10b981;
-        }
-
-        /* Основная сетка: левая панель (датчики) + правые камеры */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 2fr;
-            gap: 24px;
-        }
-
-        /* ---------- ЛЕВАЯ ПАНЕЛЬ: ПЛАН И ДАТЧИКИ ---------- */
-        .sensors-panel {
-            background: #131822;
-            border-radius: 28px;
-            padding: 24px;
-            border: 1px solid #2a3343;
-            box-shadow: 0 20px 35px -8px rgba(0,0,0,0.6);
-        }
-
-        .mall-map {
-            background: #0f141c;
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 28px;
-            border: 1px solid #2e3a4e;
-        }
-
-        .map-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 18px;
-            font-weight: 500;
-            color: #a6b6d9;
-        }
-
-        .zones-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .zone-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #1b2332;
-            padding: 14px 20px;
-            border-radius: 18px;
-            border-left: 6px solid;
-            transition: all 0.15s;
-        }
-
-        .zone-icon {
-            width: 44px;
-            height: 44px;
-            background: #0f172a;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: #f1f5f9;
-        }
-
-        .zone-info {
-            flex: 1;
-        }
-
-        .zone-name {
-            font-weight: 600;
-            font-size: 17px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .zone-desc {
-            font-size: 13px;
-            color: #8b9bc1;
-            margin-top: 4px;
-            display: flex;
-            gap: 16px;
-        }
-
-        .sensor-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: #1e2a3a;
-            padding: 3px 10px;
-            border-radius: 30px;
-            font-size: 12px;
-        }
-
-        .status {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        .status-normal { background: #10b981; box-shadow: 0 0 10px #10b98180; }
-        .status-alert { background: #ef4444; box-shadow: 0 0 12px #ef4444; animation: pulse-red 1.8s infinite; }
-        .status-warning { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
-        .status-off { background: #64748b; }
-
-        @keyframes pulse-red {
-            0% { opacity: 0.9; box-shadow: 0 0 5px #ef4444; }
-            50% { opacity: 1; box-shadow: 0 0 18px #ef4444; }
-            100% { opacity: 0.9; box-shadow: 0 0 5px #ef4444; }
-        }
-
-        .event-log {
-            margin-top: 28px;
-            background: #0f172a;
-            border-radius: 20px;
-            padding: 18px;
-        }
-
-        .event-log h3 {
-            font-size: 16px;
-            margin-bottom: 14px;
-            color: #b9c7e8;
-            font-weight: 500;
-        }
-
-        .log-item {
-            font-size: 13px;
-            padding: 10px 0;
-            border-bottom: 1px solid #253040;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .log-time {
-            color: #7f8ea3;
-            min-width: 55px;
-        }
-
-        /* ---------- ПРАВАЯ ПАНЕЛЬ: КАМЕРЫ ---------- */
-        .cameras-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .cam-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .cam-header h2 {
-            font-weight: 500;
-            font-size: 20px;
-        }
-
-        .cam-badge {
-            background: #1e2a3e;
-            padding: 5px 14px;
-            border-radius: 30px;
-            font-size: 14px;
-            border: 1px solid #3a4a62;
-        }
-
-        .cam-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-        }
-
-        .cam-card {
-            background: #131822;
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid #2a364b;
-            box-shadow: 0 12px 28px -10px #00000080;
-            transition: transform 0.1s;
-        }
-
-        .cam-preview {
-            height: 180px;
-            background: #0c101a;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* Имитация изображения с камер */
-        .cam1 { background-image: url('https://placehold.co/600x400/1a2436/94a3b8?text=ХОЛЛ+1+•+КАМЕРА+01'); background-size: cover; }
-        .cam2 { background-image: url('https://placehold.co/600x400/1e2a3a/cbd5e1?text=МАГАЗИН+1+•+КАМЕРА+02'); background-size: cover; }
-        .cam3 { background-image: url('https://placehold.co/600x400/16202e/94a3b8?text=СКЛАД+ЗОНА+Б+•+КАМЕРА+03'); background-size: cover; }
-        .cam4 { background-image: url('https://placehold.co/600x400/1a2436/cbd5e1?text=ПАРКОВКА+P1+•+КАМЕРА+04'); background-size: cover; }
-
-        .cam-overlay {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(6px);
-            padding: 5px 14px;
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #ffffff1a;
-        }
-
-        .rec-dot {
-            width: 10px;
-            height: 10px;
-            background: #ef4444;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse-rec 1.4s infinite;
-        }
-
-        @keyframes pulse-rec {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        .cam-footer {
-            padding: 16px 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #0f172a;
-        }
-
-        .cam-title {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sensor-mini {
-            font-size: 12px;
-            background: #1e293b;
-            padding: 4px 10px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .warning-tag {
-            background: #422c0e;
-            color: #fbbf24;
-            padding: 5px 12px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .footer-note {
-            margin-top: 16px;
-            color: #6d7f9c;
-            font-size: 14px;
-            display: flex;
-            gap: 20px;
-        }
-
-        /* адаптив */
-        @media (max-width: 1000px) {
-            .main-grid { grid-template-columns: 1fr; }
-            .cam-grid { grid-template-columns: 1fr 1fr; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚠️ БЕЗОПАСНОСТЬ WINDOWS | КРИТИЧЕСКИЙ СБОЙ</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0a0e12;
+      font-family: 'Courier New', Courier, monospace;
+      color: #ff4d4d;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+    .scanline {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(255,0,0,0.05) 2px, transparent 3px);
+      pointer-events: none;
+      z-index: 999;
+    }
+    .header {
+      background: #1a0000;
+      padding: 15px 25px;
+      border-bottom: 3px solid #ff0000;
+      box-shadow: 0 0 20px rgba(255,0,0,0.3);
+      text-align: center;
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { border-color: #ff0000; box-shadow: 0 0 20px red; }
+      50% { border-color: #990000; box-shadow: 0 0 5px darkred; }
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      font-weight: bold;
+      color: #ff3333;
+      text-shadow: 0 0 15px red;
+    }
+    .sub {
+      color: #cc6666;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .main-container {
+      display: flex;
+      flex: 1;
+      padding: 20px;
+      gap: 20px;
+      background: #0c0f14;
+    }
+    .camera-section {
+      flex: 2;
+      background: #050505;
+      border: 2px solid #550000;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: inset 0 0 30px black, 0 0 20px rgba(255,0,0,0.2);
+    }
+    .camera-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: #ff6666;
+      font-weight: bold;
+      font-size: 18px;
+      text-transform: uppercase;
+    }
+    .rec-dot {
+      width: 14px;
+      height: 14px;
+      background: red;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 15px red;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    #video-fake {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 8px;
+      border: 1px solid #770000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px #300;
+    }
+    #camera-stream {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none; /* Скрываем реальное видео, показываем только если разрешили */
+    }
+    #fake-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, #1a0a0a 0%, #030101 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+      border: 1px dashed #ff4444;
+    }
+    #fake-overlay img {
+      width: 80px;
+      opacity: 0.8;
+      filter: drop-shadow(0 0 10px red);
+    }
+    .cam-status {
+      margin-top: 10px;
+      color: #ff8888;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .data-section {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .log-box {
+      background: #0b0e11;
+      border: 1px solid #aa2222;
+      border-radius: 8px;
+      padding: 15px;
+      height: 100%;
+      overflow-y: auto;
+      box-shadow: inset 0 0 15px #1a0000;
+    }
+    .log-line {
+      font-family: 'Courier New', monospace;
+      font-size: 15px;
+      margin-bottom: 8px;
+      border-bottom: 1px dotted #4a0000;
+      padding-bottom: 5px;
+      color: #ffbbbb;
+    }
+    .progress-container {
+      margin-top: 5px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #ff7777;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 18px;
+      background: #1f0000;
+      border-radius: 20px;
+      border: 1px solid #b30000;
+      overflow: hidden;
+      margin: 5px 0;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 67%;
+      background: linear-gradient(90deg, #cc0000, #ff4444);
+      box-shadow: 0 0 15px red;
+      animation: loading 2s infinite alternate;
+    }
+    @keyframes loading {
+      from { width: 65%; }
+      to { width: 69%; }
+    }
+    .button-danger {
+      background: #4d0000;
+      border: 2px solid #ff0000;
+      color: white;
+      padding: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: 0.2s;
+      box-shadow: 0 0 20px red;
+      letter-spacing: 3px;
+      margin-top: 10px;
+    }
+    .button-danger:hover {
+      background: #990000;
+      box-shadow: 0 0 30px #ff5555;
+      transform: scale(1.02);
+    }
+    .footer {
+      background: #0f0000;
+      border-top: 2px solid #a00;
+      padding: 8px;
+      text-align: center;
+      color: #aa5555;
+      font-size: 13px;
+    }
+    .warning {
+      color: #ffaa00;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-<div class="dashboard">
-    <div class="header">
-        <h1>
-            <i class="fas fa-fire-extinguisher"></i> 
-            ТЦ «ГАЛАКТИКА» · Пожарный мониторинг
-        </h1>
-        <div class="status-badge">
-            <i class="fas fa-shield-alt"></i> Система активна · онлайн
-        </div>
-    </div>
+<div class="scanline"></div>
 
-    <div class="main-grid">
-        <!-- ЛЕВАЯ КОЛОНКА: ДАТЧИКИ + ПЛАН -->
-        <div class="sensors-panel">
-            <div class="mall-map">
-                <div class="map-title">
-                    <i class="fas fa-map-marked-alt"></i> План этажа · зоны контроля
-                </div>
-                <div class="zones-grid">
-                    <!-- ХОЛЛ 1 (НОРМА) -->
-                    <div class="zone-row" style="border-left-color: #10b981;">
-                        <div class="zone-icon"><i class="fas fa-door-open"></i></div>
-                        <div class="zone-info">
-                            <div class="zone-name">
-                                Холл 1 · Главный вход 
-                                <span class="status status-normal"></span>
-                            </div>
-                            <div class="zone-desc">
-                                <span class="sensor-tag"><i class="fas fa-fire"></i> Дымовой датчик 01</span>
-                                <span class="sensor-tag"><i class="fas fa-temperature-high"></i> Тепловой 03</span>
-                                <span class="sensor-tag"><i class="fas fa-bell"></i> Оповещатель OK</span>
-                            </div>
-                        </div>
-                        <div><i class="fas fa-check-circle" style="color:#10b981;"></i></div>
-                    </div>
-                    
-                    <!-- МАГАЗИН 1 (ТРЕВОГА - ЛОЖНАЯ? НО СРАБОТКА) -->
-                    <div class="zone-row" style="border-left-color: #ef4444;">
-                        <div class="zone-icon"><i class="fas fa-store"></i></div>
-                        <div class="zone-info">
-                            <div class="zone-name">
-                                Магазин 1 · «Электроника» 
-                                <span class="status status-alert"></span>
-                            </div>
-                            <div class="zone-desc">
-                                <span class="sensor-tag"><i class="fas fa-fire"></i> Дым. датчик 07 🔥</span>
-                                <span class="sensor-tag"><i class="fas fa-volume-up"></i> Оповещатель СРАБОТАЛ</span>
-                                <span class="sensor-tag"><i class="fas fa-video"></i> Камера 02</span>
-                            </div>
-                        </div>
-                        <div><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i></div>
-                    </div>
-
-                    <!-- СКЛАД ЗОНА Б (ПРЕДУПРЕЖДЕНИЕ: МРОбАтОкА) -->
-                    <div class="zone-row" style="border-left-color: #f59e0b;">
-                        <div class="zone-icon"><i class="fas fa-warehouse"></i></div>
-                        <div class="zone-info">
-                            <div class="zone-name">
-                                Склад · Зона Б 
-                                <span class="status status-warning"></span>
-                            </div>
-                            <div class="zone-desc">
-                                <span class="sensor-tag"><i class="fas fa-microchip"></i> МР-обнаружитель (не сработка)</span>
-                                <span class="sensor-tag"><i class="fas fa-bell-slash"></i> Оповещатель отложен</span>
-                                <span class="sensor-tag"><i class="fas fa-video"></i> Камера 03</span>
-                            </div>
-                        </div>
-                        <div><i class="fas fa-clock" style="color:#f59e0b;"></i></div>
-                    </div>
-
-                    <!-- ПАРКОВКА P1 (НОРМА) -->
-                    <div class="zone-row" style="border-left-color: #10b981;">
-                        <div class="zone-icon"><i class="fas fa-car"></i></div>
-                        <div class="zone-info">
-                            <div class="zone-name">
-                                Парковка P1 · уровень -1
-                                <span class="status status-normal"></span>
-                            </div>
-                            <div class="zone-desc">
-                                <span class="sensor-tag"><i class="fas fa-fire"></i> Дым. датчик 12</span>
-                                <span class="sensor-tag"><i class="fas fa-wind"></i> CO датчик норм</span>
-                                <span class="sensor-tag"><i class="fas fa-video"></i> Камера 04</span>
-                            </div>
-                        </div>
-                        <div><i class="fas fa-check-circle" style="color:#10b981;"></i></div>
-                    </div>
-
-                    <!-- ХОЛЛ 2 (НЕИСПРАВНОСТЬ ОПОВЕЩАТЕЛЯ) -->
-                    <div class="zone-row" style="border-left-color: #64748b;">
-                        <div class="zone-icon"><i class="fas fa-elevator"></i></div>
-                        <div class="zone-info">
-                            <div class="zone-name">
-                                Холл 2 · Лифтовый
-                                <span class="status status-off"></span>
-                            </div>
-                            <div class="zone-desc">
-                                <span class="sensor-tag"><i class="fas fa-fire"></i> Датчик дыма 09</span>
-                                <span class="sensor-tag"><i class="fas fa-bell-slash"></i> Оповещатель НЕИСПРАВ.</span>
-                                <span class="sensor-tag"><i class="fas fa-video"></i> Камера 01</span>
-                            </div>
-                        </div>
-                        <div><i class="fas fa-tools" style="color:#94a3b8;"></i></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ЛОГ СОБЫТИЙ (как раз «мробатока не сработка оповищеи») -->
-            <div class="event-log">
-                <h3><i class="fas fa-history"></i> Журнал событий · сегодня</h3>
-                <div class="log-item">
-                    <span class="log-time">14:23</span>
-                    <i class="fas fa-fire" style="color:#ef4444;"></i> 
-                    <span><strong>Магазин 1</strong> · датчик дыма 07 · ТРЕВОГА · оповещатель активирован</span>
-                </div>
-                <div class="log-item">
-                    <span class="log-time">14:22</span>
-                    <i class="fas fa-microchip" style="color:#f59e0b;"></i> 
-                    <span><strong>Склад Б</strong> · МР-обнаружитель · ложная тревога? Оповещатель не сработал (отложен)</span>
-                </div>
-                <div class="log-item">
-                    <span class="log-time">14:10</span>
-                    <i class="fas fa-check" style="color:#10b981;"></i> 
-                    <span>Холл 1 · все датчики в норме, камера 01 запись</span>
-                </div>
-                <div class="log-item">
-                    <span class="log-time">13:58</span>
-                    <i class="fas fa-exclamation-circle" style="color:#94a3b8;"></i> 
-                    <span>Холл 2 · неисправность оповещателя, вызвана техподдержка</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ПРАВАЯ КОЛОНКА: КАМЕРЫ -->
-        <div class="cameras-panel">
-            <div class="cam-header">
-                <h2><i class="fas fa-video"></i> Видеонаблюдение · 4 камеры</h2>
-                <span class="cam-badge"><i class="fas fa-sync-alt"></i> Поток real-time</span>
-            </div>
-            <div class="cam-grid">
-                <!-- Камера 1 ХОЛЛ 1 -->
-                <div class="cam-card">
-                    <div class="cam-preview cam1">
-                        <div class="cam-overlay">
-                            <span class="rec-dot"></span> LIVE · ХОЛЛ 1
-                        </div>
-                    </div>
-                    <div class="cam-footer">
-                        <div class="cam-title">
-                            <i class="fas fa-camera"></i> Камера 01 · Главный холл
-                        </div>
-                        <div class="sensor-mini">
-                            <span class="status status-normal" style="width:10px;height:10px;"></span> датчики норма
-                        </div>
-                    </div>
-                </div>
-                <!-- Камера 2 МАГАЗИН 1 (ТРЕВОГА) -->
-                <div class="cam-card">
-                    <div class="cam-preview cam2" style="position:relative;">
-                        <div class="cam-overlay" style="background:#7f1d1d80; border-color:#ef4444;">
-                            <span class="rec-dot"></span> ТРЕВОГА · МАГАЗИН 1
-                        </div>
-                        <!-- эмуляция тревожной рамки -->
-                    </div>
-                    <div class="cam-footer">
-                        <div class="cam-title">
-                            <i class="fas fa-camera"></i> Камера 02 · Магазин 1
-                        </div>
-                        <div class="warning-tag">
-                            <i class="fas fa-bell"></i> Оповещатель активен
-                        </div>
-                    </div>
-                </div>
-                <!-- Камера 3 СКЛАД (МР-обнаружитель) -->
-                <div class="cam-card">
-                    <div class="cam-preview cam3">
-                        <div class="cam-overlay" style="background:#382d0e;">
-                            <i class="fas fa-exclamation"></i> ВНИМАНИЕ · СКЛАД Б
-                        </div>
-                    </div>
-                    <div class="cam-footer">
-                        <div class="cam-title">
-                            <i class="fas fa-camera"></i> Камера 03 · Склад зона Б
-                        </div>
-                        <div class="sensor-mini" style="background:#3b2e0e; color:#fbbf24;">
-                            <i class="fas fa-microchip"></i> МР-обнаружитель · без оповещ.
-                        </div>
-                    </div>
-                </div>
-                <!-- Камера 4 ПАРКОВКА -->
-                <div class="cam-card">
-                    <div class="cam-preview cam4">
-                        <div class="cam-overlay">
-                            <span class="rec-dot"></span> ПАРКОВКА P1
-                        </div>
-                    </div>
-                    <div class="cam-footer">
-                        <div class="cam-title">
-                            <i class="fas fa-camera"></i> Камера 04 · Парковка
-                        </div>
-                        <div class="sensor-mini">
-                            <span class="status status-normal" style="width:10px;height:10px;"></span> CO/дым норма
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- доп. информация о системе -->
-            <div class="footer-note">
-                <span><i class="fas fa-microchip"></i> МР-обнаружители: склад Б — «не сработка оповещения», требуется проверка</span>
-                <span><i class="fas fa-map-pin"></i> ТЦ «Галактика» · все зоны под контролем</span>
-            </div>
-        </div>
-    </div>
+<div class="header">
+  <h1>⚠️ ВНИМАНИЕ! ВАШ КОМПЬЮТЕР ЗАБЛОКИРОВАН ⚠️</h1>
+  <div class="sub">КРИТИЧЕСКАЯ УЯЗВИМОСТЬ WINDOWS 34 // СЛИВ ДАННЫХ АКТИВЕН</div>
 </div>
+
+<div class="main-container">
+  <!-- Блок с камерой -->
+  <div class="camera-section">
+    <div class="camera-title">
+      <span class="rec-dot"></span> ВЕБ-КАМЕРА (ПРЯМАЯ ТРАНСЛЯЦИЯ)
+      <span style="margin-left: auto; font-size: 14px;">СЕРВЕР: FSB-ONLINE</span>
+    </div>
+    <div id="video-fake">
+      <video id="camera-stream" autoplay playsinline></video>
+      <div id="fake-overlay">
+        <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
+        <div style="font-weight: bold; color: #ff5555;">[ КАМЕРА АКТИВНА ]</div>
+        <div style="font-size: 13px; margin-top: 12px; color: #aa5555;">ПОТОК ПЕРЕДАЁТСЯ НА СЕРВЕР TOR</div>
+        <div style="font-size: 12px; background: #1a0000; padding: 6px; border-radius: 20px; margin-top: 15px; border: 1px solid red;">IP: 185.244.23.89 • VPN: ОТКЛЮЧЕН</div>
+      </div>
+    </div>
+    <div class="cam-status">
+      <span>📁 СНИМКИ ЭКРАНА: 14 шт</span>
+      <span>🎥 ЗАПИСЬ: АКТИВНО</span>
+      <span>⏺️ ФОТО СДЕЛАНО</span>
+    </div>
+  </div>
+
+  <!-- Блок с "данными" -->
+  <div class="data-section">
+    <div class="log-box" id="logContainer">
+      <div class="log-line">[СИСТЕМА] Обход брандмауэра... УСПЕШНО</div>
+      <div class="log-line">[БРАУЗЕР] Перехват cookie: VK, Telegram, Сбер...</div>
+      <div class="log-line">[ФАЙЛЫ] Desktop/Паспорт.pdf, Desktop/Пароли.txt</div>
+      <div class="log-line">[ГЕОЛОКАЦИЯ] г. Москва, ул. Тверская (точность 2м)</div>
+      <div class="log-line">[ДАННЫЕ] Ваши контакты, история звонков...</div>
+      <div class="log-line">[ПЛАТЕЖИ] Последние 3 транзакции извлечены</div>
+      <div class="log-line" style="color:#ffaa00;">⚠️ СПИСАНИЕ 5000₽ В ПОЛЬЗУ БЛАГОТВОРИТЕЛЬНОСТИ</div>
+      <div class="log-line">[ВИДЕО] Сохранение записи с камеры (24 сек.)</div>
+      
+      <div class="progress-container">
+        <div class="progress-label"><span>ЗАГРУЗКА ВАШИХ ДАННЫХ В TOR</span><span>67%</span></div>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+      </div>
+      
+      <div style="margin-top: 15px; background: #1a0101; padding: 12px; border-radius: 8px; border-left: 6px solid red;">
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <span style="font-size: 28px;">🛡️</span>
+          <div><strong style="color:white;">ВНИМАНИЕ! ВАШИ ДАННЫЕ УЖЕ ПЕРЕДАНЫ</strong><br>
+          <span style="color: #ff9999;">Скриншот рабочего стола, история браузера, фото с камеры.</span></div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; text-align: center; color: #bb5555;">
+        Для удаления информации переведите 0.5 BTC на кошелёк<br>
+        <span style="background:#200; padding:4px 12px; border-radius:20px; font-family:monospace;">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</span>
+      </div>
+    </div>
+    
+    <button class="button-danger" id="panicBtn">❌ УДАЛИТЬ ВСЕ ДАННЫЕ (НЕ РАБОТАЕТ) ❌</button>
+  </div>
+</div>
+
+<div class="footer">
+  <span style="color:#ff8888;">⚠️ ВАШ IP: 192.168.88.254 | ПРОВАЙДЕР: РОСТЕЛЕКОМ | СТАТУС: УТЕЧКА ДАННЫХ ⚠️</span>
+</div>
+
 <script>
-    // Простая эмуляция: можно добавить динамики, но для демо достаточно статики.
-    // Если нужно, добавим небольшое обновление времени в лог (чисто для вида)
-    (function(){
-        console.log('Система управления противопожарной безопасностью · мониторинг камер');
-        // Можно обновить статус "МРобатока не сработка" в интерфейсе, но это уже есть.
-    })();
+  (function() {
+    "use strict";
+    
+    const video = document.getElementById('camera-stream');
+    const fakeOverlay = document.getElementById('fake-overlay');
+    const logContainer = document.getElementById('logContainer');
+    
+    // Имитация бурной деятельности в логах
+    const fakeMessages = [
+      "[ПАРОЛИ] Извлечено: 24 аккаунта (соцсети, почта)",
+      "[КОНТАКТЫ] Телефонная книга: 187 записей",
+      "[КРИПТО] Поиск кошельков... Найдено: Exodus, MetaMask",
+      "[БАНК] Подключение к СберБанк Онлайн... сессия перехвачена",
+      "[ФОТО] Извлечено 3 фото с веб-камеры (сохранено)",
+      "[СМС] Перехват входящих сообщений активирован",
+      "[МЕСТОПОЛОЖЕНИЕ] Обновлено: ул. Ленина, д.15"
+    ];
+    
+    let msgIndex = 0;
+    function addFakeLog() {
+      if (!logContainer) return;
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.style.color = '#ffaa88';
+      line.textContent = fakeMessages[msgIndex % fakeMessages.length];
+      logContainer.appendChild(line);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      msgIndex++;
+    }
+    
+    // Запускаем добавление логов каждые 4 секунды
+    setInterval(addFakeLog, 4000);
+    
+    // Попытка запросить доступ к камере (настоящий запрос, чтобы испугать)
+    async function requestCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        // Если разрешили — показываем видео вместо фейкового оверлея
+        video.srcObject = stream;
+        video.style.display = 'block';
+        fakeOverlay.style.display = 'none';
+        
+        // Добавляем страшную надпись что фото сделано
+        setTimeout(() => {
+          const log = document.createElement('div');
+          log.className = 'log-line';
+          log.style.color = '#ff5555';
+          log.style.fontWeight = 'bold';
+          log.textContent = '[!] ФОТО ПОЛЬЗОВАТЕЛЯ УСПЕШНО СДЕЛАНО И ОТПРАВЛЕНО';
+          logContainer.appendChild(log);
+          logContainer.scrollTop = logContainer.scrollHeight;
+        }, 2000);
+        
+      } catch (err) {
+        // Если отказал или нет камеры — просто оставляем черный квадрат с надписью
+        console.log('Камера отклонена или недоступна');
+        const log = document.createElement('div');
+        log.className = 'log-line';
+        log.style.color = 'orange';
+        log.textContent = '[КАМЕРА] Доступ запрещён. Используем последний снимок из кэша.';
+        logContainer.appendChild(log);
+      }
+    }
+    
+    // Запрашиваем камеру сразу после загрузки страницы
+    window.addEventListener('load', () => {
+      requestCamera();
+      
+      // Ещё добавим пугающих сообщений
+      setTimeout(() => {
+        const warn = document.createElement('div');
+        warn.className = 'log-line';
+        warn.innerHTML = '<span style="color:red;">[!!!] ВАШИ ДАННЫЕ ПЕРЕДАНЫ НА 3 СЕРВЕРА ДАРКНЕТА</span>';
+        logContainer.appendChild(warn);
+      }, 1500);
+    });
+    
+    // Кнопка паники
+    const panicBtn = document.getElementById('panicBtn');
+    panicBtn.addEventListener('click', function() {
+      // Меняем надпись, но ничего не происходит
+      this.textContent = '⚠️ ОШИБКА: НЕВОЗМОЖНО ОСТАНОВИТЬ ПРОЦЕСС ⚠️';
+      this.style.background = '#330000';
+      this.disabled = true;
+      
+      const errorLog = document.createElement('div');
+      errorLog.className = 'log-line';
+      errorLog.style.color = '#ff8888';
+      errorLog.textContent = '[ОТКАЗ] Удаление заблокировано администратором системы.';
+      logContainer.appendChild(errorLog);
+      
+      // Всплывающее окно для эффекта
+      alert('❌ ОШИБКА 451: Доступ запрещён. Ваши данные уже синхронизированы.');
+      
+      // Дополнительный испуг
+      setTimeout(() => {
+        alert('📸 Фото с камеры отправлено в Telegram-бот.');
+      }, 600);
+    });
+    
+    // Имитация счетчика процентов (бесконечный)
+    let percent = 67;
+    const progressFill = document.querySelector('.progress-fill');
+    const progressPercent = document.querySelector('.progress-label span:last-child');
+    setInterval(() => {
+      if (percent < 95) {
+        percent += Math.random() * 3;
+        if (percent > 95) percent = 95;
+        progressFill.style.width = percent + '%';
+        if (progressPercent) progressPercent.textContent = Math.floor(percent) + '%';
+      }
+      if (percent > 90) {
+        // добавим критический лог
+        const crit = document.createElement('div');
+        crit.className = 'log-line';
+        crit.style.color = '#ffaa00';
+        crit.textContent = '[ПЕРЕДАЧА] Финальный пакет данных отправлен.';
+        logContainer.appendChild(crit);
+      }
+    }, 2000);
+    
+    // При клике на адрес кошелька тоже что-то происходит
+    document.querySelector('span[style*="background:#200"]').addEventListener('click', function() {
+      alert('Биткоин-адрес скопирован. Ожидаем перевод в течение 24 часов. В случае отсутствия платежа данные будут опубликованы.');
+    });
+    
+    // Эффект "страшного" фото: если камера включена, периодически делаем скриншот canvas (не сохраняем, просто визуал)
+    // но добавим эффект вспышки
+    setInterval(() => {
+      if (video.style.display === 'block') {
+        // имитация фото вспышкой
+        const flash = document.createElement('div');
+        flash.style.position = 'fixed';
+        flash.style.top = '0'; flash.style.left = '0';
+        flash.style.width = '100%'; flash.style.height = '100%';
+        flash.style.backgroundColor = 'white';
+        flash.style.opacity = '0.3';
+        flash.style.pointerEvents = 'none';
+        flash.style.zIndex = '9999';
+        flash.style.transition = 'opacity 0.2s';
+        document.body.appendChild(flash);
+        setTimeout(() => flash.style.opacity = '0', 50);
+        setTimeout(() => flash.remove(), 300);
+      }
+    }, 8000);
+    
+  })();
 </script>
+
+<!-- Делаем чтобы нельзя было закрыть вкладку без предупреждения (по правилам браузера) -->
+<script>
+  window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = 'Внимание! Ваши данные всё ещё передаются. Вы уверены, что хотите покинуть страницу?';
+    return 'Внимание! Ваши данные всё ещё передаются.';
+  });
+</script>
+
 </body>
-            </html>
+</html>
